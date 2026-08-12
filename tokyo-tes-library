@@ -909,7 +909,8 @@ local Close = Custom:Create("ImageLabel", {
 
   -- ▲▲▲ SAMPAI SINI ▲▲▲
 
-	MakeDraggable(Top, DropShadowHolder)
+  DropShadowHolder.Size = ResponsiveSize
+  MakeDraggable(Top, DropShadowHolder)
 
 
   -- /// Blur
