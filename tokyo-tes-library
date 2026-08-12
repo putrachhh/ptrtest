@@ -379,8 +379,6 @@ function Speed_Library:CreateWindow(Config)
   local Description = Config[2] or Config.Description or ""
   local TabWidth = Config[3] or Config["Tab Width"] or 120
   local SizeUi = Config[4] or Config.SizeUi or UDim2.fromOffset(650, 400)
-  local LogoIcon = Config.Logo or ""        -- TAMBAHAN BARU
-  local DiscordLink = Config.Discord or ""  -- TAMBAHAN BARU
 
   local Funcs = {}
 
@@ -445,122 +443,155 @@ function Speed_Library:CreateWindow(Config)
 
   Custom:Create("UICorner", {}, Top)
 
-  local currentX = 10 -- Titik mulai dari kiri
+  -- Container Pembungkus (Agar tersusun menyamping otomatis)
+  local TopLayoutContainer = Custom:Create("Frame", {
+    BackgroundTransparency = 1,
+    Size = UDim2.new(1, -70, 1, 0), -- Menyisakan ruang di kanan untuk tombol Close & Min
+    Position = UDim2.new(0, 10, 0, 0),
+    Name = "TopLayoutContainer"
+  }, Top)
 
-  -- 1. KOTAK LOGO
-  if LogoIcon ~= "" then
-      local LogoContainer = Custom:Create("Frame", {
-          BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-          BorderSizePixel = 0,
-          AnchorPoint = Vector2.new(0, 0.5),
-          Position = UDim2.new(0, currentX, 0.5, 0),
-          Size = UDim2.new(0, 26, 0, 26),
-          Name = "LogoContainer"
-      }, Top)
-      Custom:Create("UICorner", { CornerRadius = UDim.new(0, 6) }, LogoContainer)
-      
-      Custom:Create("ImageLabel", {
-          Image = LogoIcon,
-          BackgroundTransparency = 1,
-          Size = UDim2.new(1, 0, 1, 0),
-          Name = "LogoImage"
-      }, LogoContainer)
+  Custom:Create("UIListLayout", {
+    FillDirection = Enum.FillDirection.Horizontal,
+    SortOrder = Enum.SortOrder.LayoutOrder,
+    VerticalAlignment = Enum.VerticalAlignment.Center,
+    Padding = UDim.new(0, 6)
+  }, TopLayoutContainer)
 
-      currentX = currentX + 34 
-  end
+  -- 1. LOGO (Kotak putih sudut membulat)
+  local LogoBg = Custom:Create("Frame", {
+    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+    Size = UDim2.new(0, 24, 0, 24),
+    LayoutOrder = 1
+  }, TopLayoutContainer)
+  Custom:Create("UICorner", { CornerRadius = UDim.new(0, 5) }, LogoBg)
+  
+  local LogoImg = Custom:Create("ImageLabel", {
+    BackgroundTransparency = 1,
+    Size = UDim2.new(1, -4, 1, -4),
+    Position = UDim2.new(0, 2, 0, 2),
+    Image = Config.Logo or "rbxassetid://91570350247074", -- Ganti ID Logo bos di sini
+    ImageColor3 = Custom.ColorRGB, -- Warna logo ngikutin warna tema
+    LayoutOrder = 1
+  }, LogoBg)
 
-  -- 2. JUDUL
-  if Title ~= "" then
-      local TextLabel = Custom:Create("TextLabel", {
-          Font = Enum.Font.GothamBold,
-          Text = Title,
-          TextColor3 = Color3.fromRGB(255, 255, 255),
-          TextSize = 14,
-          TextXAlignment = Enum.TextXAlignment.Left,
-          BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-          BackgroundTransparency = 0.999,
-          BorderColor3 = Color3.fromRGB(0, 0, 0),
-          BorderSizePixel = 0,
-          Position = UDim2.new(0, currentX, 0, 0),
-          Size = UDim2.new(0, 200, 1, 0) 
-      }, Top)
-      
-      -- [FIX] Pakai TextService biar ukuran otomatis akurat meski belum dirender!
-      local titleWidth = game:GetService("TextService"):GetTextSize(Title, 14, Enum.Font.GothamBold, Vector2.new(1000, 38)).X
-      TextLabel.Size = UDim2.new(0, titleWidth, 1, 0) 
-      currentX = currentX + titleWidth + 6 
-  end
+  -- 2. TEKS: TOKYO
+  local TextTokyo = Custom:Create("TextLabel", {
+    BackgroundTransparency = 1,
+    Font = Enum.Font.GothamBold,
+    Text = Config.HubName or "Tokyo",
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+    TextSize = 13,
+    Size = UDim2.new(0, 0, 1, 0),
+    AutomaticSize = Enum.AutomaticSize.X,
+    LayoutOrder = 2
+  }, TopLayoutContainer)
 
-  -- 3. DESKRIPSI
-  if Description ~= "" then
-      local TextLabel1 = Custom:Create("TextLabel", {
-          Font = Enum.Font.GothamBold,
-          Text = Description,
-          TextColor3 = Custom.ColorRGB,
-          TextSize = 14,
-          TextXAlignment = Enum.TextXAlignment.Left,
-          BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-          BackgroundTransparency = 0.999,
-          BorderColor3 = Color3.fromRGB(0, 0, 0),
-          BorderSizePixel = 0,
-          Position = UDim2.new(0, currentX, 0, 0),
-          Size = UDim2.new(0, 200, 1, 0)
-      }, Top)
-      
-      Custom:Create("UIStroke", {
-          Color = Custom.ColorRGB,
-          Thickness = 0.4
-      }, TextLabel1)
+  -- 3. PEMISAH (-)
+  local Sep1 = Custom:Create("TextLabel", {
+    BackgroundTransparency = 1,
+    Font = Enum.Font.GothamBold,
+    Text = "-",
+    TextColor3 = Color3.fromRGB(150, 150, 150),
+    TextSize = 13,
+    Size = UDim2.new(0, 0, 1, 0),
+    AutomaticSize = Enum.AutomaticSize.X,
+    LayoutOrder = 3
+  }, TopLayoutContainer)
 
-      -- [FIX] Pakai TextService untuk ukuran deskripsi
-      local descWidth = game:GetService("TextService"):GetTextSize(Description, 14, Enum.Font.GothamBold, Vector2.new(1000, 38)).X
-      TextLabel1.Size = UDim2.new(0, descWidth, 1, 0)
-      currentX = currentX + descWidth + 15 
-  end
+  -- 4. TEKS: NAMA GAME
+  local TextGame = Custom:Create("TextLabel", {
+    BackgroundTransparency = 1,
+    Font = Enum.Font.GothamBold,
+    Text = Config.GameName or Title,
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+    TextSize = 13,
+    Size = UDim2.new(0, 0, 1, 0),
+    AutomaticSize = Enum.AutomaticSize.X,
+    LayoutOrder = 4
+  }, TopLayoutContainer)
 
-  -- 4. DISCORD PILL (KOTAK KAPSUL)
-  if DiscordLink ~= "" then
-      -- [FIX] Pakai TextService untuk ukuran kotak Discord
-      local textWidth = game:GetService("TextService"):GetTextSize(DiscordLink, 13, Enum.Font.GothamBold, Vector2.new(1000, 26)).X
-      local pillWidth = 28 + textWidth + 12 -- 28px ruang untuk logo kiri + teks + 12px margin kanan
+  -- 5. PEMISAH (-)
+  local Sep2 = Custom:Create("TextLabel", {
+    BackgroundTransparency = 1,
+    Font = Enum.Font.GothamBold,
+    Text = "-",
+    TextColor3 = Color3.fromRGB(150, 150, 150),
+    TextSize = 13,
+    Size = UDim2.new(0, 0, 1, 0),
+    AutomaticSize = Enum.AutomaticSize.X,
+    LayoutOrder = 5
+  }, TopLayoutContainer)
 
-      local DiscordPill = Custom:Create("Frame", {
-          BackgroundColor3 = Color3.fromRGB(30, 25, 35), 
-          BackgroundTransparency = 0.2,
-          BorderSizePixel = 0,
-          AnchorPoint = Vector2.new(0, 0.5),
-          Position = UDim2.new(0, currentX, 0.5, 0),
-          Size = UDim2.new(0, pillWidth, 0, 26),
-          Name = "DiscordPill"
-      }, Top)
-      Custom:Create("UICorner", { CornerRadius = UDim.new(0, 6) }, DiscordPill)
-      
-      Custom:Create("UIStroke", {
-          Color = Custom.ColorRGB,
-          Thickness = 1,
-          Transparency = 0.3
-      }, DiscordPill)
+  -- 6. TEKS: PREMIUM (Diwarnai sesuai tema)
+  local TextPremium = Custom:Create("TextLabel", {
+    BackgroundTransparency = 1,
+    Font = Enum.Font.GothamBold,
+    Text = Config.Version or Description,
+    TextColor3 = Custom.ColorRGB,
+    TextSize = 13,
+    Size = UDim2.new(0, 0, 1, 0),
+    AutomaticSize = Enum.AutomaticSize.X,
+    LayoutOrder = 6
+  }, TopLayoutContainer)
+  Custom:Create("UIStroke", { Color = Custom.ColorRGB, Thickness = 0.4 }, TextPremium)
 
-      -- [FIX] ID Logo Discord yang 100% Anti Banned
-      Custom:Create("ImageLabel", {
-          Image = "rbxassetid://3192533221", 
-          BackgroundTransparency = 1,
-          AnchorPoint = Vector2.new(0, 0.5),
-          Position = UDim2.new(0, 6, 0.5, 0),
-          Size = UDim2.new(0, 16, 0, 16),
-      }, DiscordPill)
+  -- 7. TOMBOL LINK DISCORD (Kapsul / Pill Shape)
+  local DiscordBtnBg = Custom:Create("Frame", {
+    BackgroundColor3 = Color3.fromRGB(20, 20, 25),
+    BackgroundTransparency = 0.4,
+    Size = UDim2.new(0, 0, 0, 22),
+    AutomaticSize = Enum.AutomaticSize.X,
+    LayoutOrder = 7
+  }, TopLayoutContainer)
+  
+  Custom:Create("UICorner", { CornerRadius = UDim.new(1, 0) }, DiscordBtnBg)
+  Custom:Create("UIStroke", { Color = Custom.ColorRGB, Thickness = 1.2 }, DiscordBtnBg)
 
-      Custom:Create("TextLabel", {
-          Font = Enum.Font.GothamBold,
-          Text = DiscordLink,
-          TextColor3 = Color3.fromRGB(255, 255, 255),
-          TextSize = 13,
-          TextXAlignment = Enum.TextXAlignment.Left,
-          BackgroundTransparency = 1,
-          Position = UDim2.new(0, 28, 0, 0),
-          Size = UDim2.new(1, -28, 1, 0),
-      }, DiscordPill)
-  end
+  Custom:Create("UIListLayout", {
+    FillDirection = Enum.FillDirection.Horizontal,
+    SortOrder = Enum.SortOrder.LayoutOrder,
+    VerticalAlignment = Enum.VerticalAlignment.Center,
+    Padding = UDim.new(0, 5)
+  }, DiscordBtnBg)
+  
+  Custom:Create("UIPadding", {
+    PaddingLeft = UDim.new(0, 8),
+    PaddingRight = UDim.new(0, 8)
+  }, DiscordBtnBg)
+
+  local DiscordIcon = Custom:Create("ImageLabel", {
+    BackgroundTransparency = 1,
+    Image = "rbxassetid://14742917757", -- Icon Discord standar
+    Size = UDim2.new(0, 14, 0, 14),
+    LayoutOrder = 1
+  }, DiscordBtnBg)
+
+  local DiscordText = Custom:Create("TextLabel", {
+    BackgroundTransparency = 1,
+    Font = Enum.Font.GothamBold,
+    Text = Config.Discord or "discord.gg/ptrtokyo",
+    TextColor3 = Color3.fromRGB(230, 230, 230),
+    TextSize = 11,
+    Size = UDim2.new(0, 0, 1, 0),
+    AutomaticSize = Enum.AutomaticSize.X,
+    LayoutOrder = 2
+  }, DiscordBtnBg)
+
+  local DiscordClick = Custom:Create("TextButton", {
+    BackgroundTransparency = 1,
+    Text = "",
+    Size = UDim2.new(1, 0, 1, 0),
+    Position = UDim2.new(0,0,0,0),
+    ZIndex = 5
+  }, DiscordBtnBg)
+
+  -- Fitur Copy Link otomatis saat kapsul discord diklik
+  DiscordClick.Activated:Connect(function()
+    if setclipboard then
+      setclipboard(Config.Discord or "https://discord.gg/ptrtokyo")
+    end
+  end)
 
 local Close = Custom:Create("ImageLabel", {
     Image = "rbxassetid://10747384394",
@@ -886,7 +917,7 @@ local Close = Custom:Create("ImageLabel", {
 
   -- ▲▲▲ SAMPAI SINI ▲▲▲
 
-  DropShadowHolder.Size = ResponsiveSize
+  DropShadowHolder.Size = UDim2.new(0, 115 + TextLabel.TextBounds.X + 1 + TextLabel1.TextBounds.X, 0, 350)
 	MakeDraggable(Top, DropShadowHolder)
 
 
