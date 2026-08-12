@@ -485,7 +485,8 @@ function Speed_Library:CreateWindow(Config)
           Size = UDim2.new(0, 200, 1, 0) 
       }, Top)
       
-      local titleWidth = TextLabel.TextBounds.X
+      -- [FIX] Pakai TextService biar ukuran otomatis akurat meski belum dirender!
+      local titleWidth = game:GetService("TextService"):GetTextSize(Title, 14, Enum.Font.GothamBold, Vector2.new(1000, 38)).X
       TextLabel.Size = UDim2.new(0, titleWidth, 1, 0) 
       currentX = currentX + titleWidth + 6 
   end
@@ -511,21 +512,17 @@ function Speed_Library:CreateWindow(Config)
           Thickness = 0.4
       }, TextLabel1)
 
-      local descWidth = TextLabel1.TextBounds.X
+      -- [FIX] Pakai TextService untuk ukuran deskripsi
+      local descWidth = game:GetService("TextService"):GetTextSize(Description, 14, Enum.Font.GothamBold, Vector2.new(1000, 38)).X
       TextLabel1.Size = UDim2.new(0, descWidth, 1, 0)
       currentX = currentX + descWidth + 15 
   end
 
-  -- 4. DISCORD PILL
+  -- 4. DISCORD PILL (KOTAK KAPSUL)
   if DiscordLink ~= "" then
-      local tempText = Instance.new("TextLabel")
-      tempText.Font = Enum.Font.GothamBold
-      tempText.TextSize = 13
-      tempText.Text = DiscordLink
-      local textWidth = tempText.TextBounds.X
-      tempText:Destroy()
-
-      local pillWidth = 26 + textWidth + 15 
+      -- [FIX] Pakai TextService untuk ukuran kotak Discord
+      local textWidth = game:GetService("TextService"):GetTextSize(DiscordLink, 13, Enum.Font.GothamBold, Vector2.new(1000, 26)).X
+      local pillWidth = 28 + textWidth + 12 -- 28px ruang untuk logo kiri + teks + 12px margin kanan
 
       local DiscordPill = Custom:Create("Frame", {
           BackgroundColor3 = Color3.fromRGB(30, 25, 35), 
@@ -544,8 +541,9 @@ function Speed_Library:CreateWindow(Config)
           Transparency = 0.3
       }, DiscordPill)
 
+      -- [FIX] ID Logo Discord yang 100% Anti Banned
       Custom:Create("ImageLabel", {
-          Image = "rbxassetid://14813330364", 
+          Image = "rbxassetid://3192533221", 
           BackgroundTransparency = 1,
           AnchorPoint = Vector2.new(0, 0.5),
           Position = UDim2.new(0, 6, 0.5, 0),
