@@ -432,21 +432,10 @@ function Speed_Library:CreateWindow(Config)
     Thickness = 0.8
   }, Main)
 
-  local Top = Custom:Create("Frame", {
-    BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-    BackgroundTransparency = 0.999,
-    BorderColor3 = Color3.fromRGB(0, 0, 0),
-    BorderSizePixel = 0,
-    Size = UDim2.new(1, 0, 0, 38),
-    Name = "Top"
-  }, Main)
-
-  Custom:Create("UICorner", {}, Top)
-
   -- Container Pembungkus (Agar tersusun menyamping otomatis)
   local TopLayoutContainer = Custom:Create("Frame", {
     BackgroundTransparency = 1,
-    Size = UDim2.new(1, -70, 1, 0), -- Menyisakan ruang di kanan untuk tombol Close & Min
+    Size = UDim2.new(1, -70, 1, 0), 
     Position = UDim2.new(0, 10, 0, 0),
     Name = "TopLayoutContainer"
   }, Top)
@@ -455,10 +444,10 @@ function Speed_Library:CreateWindow(Config)
     FillDirection = Enum.FillDirection.Horizontal,
     SortOrder = Enum.SortOrder.LayoutOrder,
     VerticalAlignment = Enum.VerticalAlignment.Center,
-    Padding = UDim.new(0, 6)
+    Padding = UDim.new(0, 7) -- Jarak antar elemen diperlebar sedikit biar rapi
   }, TopLayoutContainer)
 
-  -- 1. LOGO (Kotak putih sudut membulat)
+  -- 1. LOGO 
   local LogoBg = Custom:Create("Frame", {
     BackgroundColor3 = Color3.fromRGB(255, 255, 255),
     Size = UDim2.new(0, 24, 0, 24),
@@ -470,8 +459,8 @@ function Speed_Library:CreateWindow(Config)
     BackgroundTransparency = 1,
     Size = UDim2.new(1, -4, 1, -4),
     Position = UDim2.new(0, 2, 0, 2),
-    Image = Config.Logo or "rbxassetid://91570350247074", -- Ganti ID Logo bos di sini
-    ImageColor3 = Custom.ColorRGB, -- Warna logo ngikutin warna tema
+    Image = Config.Logo or "rbxassetid://91570350247074", 
+    ImageColor3 = Custom.ColorRGB, 
     LayoutOrder = 1
   }, LogoBg)
 
@@ -487,11 +476,11 @@ function Speed_Library:CreateWindow(Config)
     LayoutOrder = 2
   }, TopLayoutContainer)
 
-  -- 3. PEMISAH (-)
+  -- 3. PEMISAH 1 (|)
   local Sep1 = Custom:Create("TextLabel", {
     BackgroundTransparency = 1,
     Font = Enum.Font.GothamBold,
-    Text = "-",
+    Text = "|", -- Diganti jadi garis tegak
     TextColor3 = Color3.fromRGB(150, 150, 150),
     TextSize = 13,
     Size = UDim2.new(0, 0, 1, 0),
@@ -511,11 +500,11 @@ function Speed_Library:CreateWindow(Config)
     LayoutOrder = 4
   }, TopLayoutContainer)
 
-  -- 5. PEMISAH (-)
+  -- 5. PEMISAH 2 (-)
   local Sep2 = Custom:Create("TextLabel", {
     BackgroundTransparency = 1,
     Font = Enum.Font.GothamBold,
-    Text = "-",
+    Text = "-", -- Tetap strip
     TextColor3 = Color3.fromRGB(150, 150, 150),
     TextSize = 13,
     Size = UDim2.new(0, 0, 1, 0),
@@ -523,7 +512,7 @@ function Speed_Library:CreateWindow(Config)
     LayoutOrder = 5
   }, TopLayoutContainer)
 
-  -- 6. TEKS: PREMIUM (Diwarnai sesuai tema)
+  -- 6. TEKS: VERSION / PREMIUM 
   local TextPremium = Custom:Create("TextLabel", {
     BackgroundTransparency = 1,
     Font = Enum.Font.GothamBold,
@@ -536,10 +525,12 @@ function Speed_Library:CreateWindow(Config)
   }, TopLayoutContainer)
   Custom:Create("UIStroke", { Color = Custom.ColorRGB, Thickness = 0.4 }, TextPremium)
 
-  -- 7. TOMBOL LINK DISCORD (Kapsul / Pill Shape)
-  local DiscordBtnBg = Custom:Create("Frame", {
+  -- 7. TOMBOL LINK DISCORD (Versi Fixed)
+  local DiscordBtnBg = Custom:Create("TextButton", {
     BackgroundColor3 = Color3.fromRGB(20, 20, 25),
     BackgroundTransparency = 0.4,
+    Text = "",
+    AutoButtonColor = false,
     Size = UDim2.new(0, 0, 0, 22),
     AutomaticSize = Enum.AutomaticSize.X,
     LayoutOrder = 7
@@ -562,7 +553,7 @@ function Speed_Library:CreateWindow(Config)
 
   local DiscordIcon = Custom:Create("ImageLabel", {
     BackgroundTransparency = 1,
-    Image = "rbxassetid://14742917757", -- Icon Discord standar
+    Image = "rbxassetid://14742917757", 
     Size = UDim2.new(0, 14, 0, 14),
     LayoutOrder = 1
   }, DiscordBtnBg)
@@ -578,16 +569,7 @@ function Speed_Library:CreateWindow(Config)
     LayoutOrder = 2
   }, DiscordBtnBg)
 
-  local DiscordClick = Custom:Create("TextButton", {
-    BackgroundTransparency = 1,
-    Text = "",
-    Size = UDim2.new(1, 0, 1, 0),
-    Position = UDim2.new(0,0,0,0),
-    ZIndex = 5
-  }, DiscordBtnBg)
-
-  -- Fitur Copy Link otomatis saat kapsul discord diklik
-  DiscordClick.Activated:Connect(function()
+  DiscordBtnBg.Activated:Connect(function()
     if setclipboard then
       setclipboard(Config.Discord or "https://discord.gg/ptrtokyo")
     end
