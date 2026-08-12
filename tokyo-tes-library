@@ -39,7 +39,7 @@ local function OpenClose()
 
   local Close_ImageButton = Custom:Create("ImageButton", {
     BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-    BorderColor3 = Custom.ColorRGB, -- Ubah ke Custom.ColorRGB agar mengikuti tema
+    BorderColor3 = Custom.ColorRGB, 
     BackgroundTransparency = 1,
     Position = UDim2.new(0.1021, 0, 0.0743, 0),
     Size = UDim2.new(0, 45, 0, 45),
@@ -386,17 +386,16 @@ function Speed_Library:CreateWindow(Config)
     ZIndexBehavior = Enum.ZIndexBehavior.Sibling
   }, RunService:IsStudio() and Player.PlayerGui or (gethui() or cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")))
 
-  -- DETEKSI OTOMATIS HP ATAU PC
   local IsMobile = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
   local ResponsiveSize = IsMobile and UDim2.new(0, 420, 0, 260) or SizeUi
 
   local DropShadowHolder = Custom:Create("Frame", {
     BackgroundTransparency = 1,
     BorderSizePixel = 0,
-    Size = UDim2.new(0, 455, 0, 350),
+    Size = ResponsiveSize,
     ZIndex = 0,
     Name = "DropShadowHolder",
-    Position = UDim2.new(0, (SpeedHubXGui.AbsoluteSize.X // 2 - 455 // 2), 0, (SpeedHubXGui.AbsoluteSize.Y // 2 - 350 // 2))
+    Position = UDim2.new(0, (SpeedHubXGui.AbsoluteSize.X // 2 - ResponsiveSize.X.Offset // 2), 0, (SpeedHubXGui.AbsoluteSize.Y // 2 - ResponsiveSize.Y.Offset // 2))
   }, SpeedHubXGui)
 
   local DropShadow = Custom:Create("ImageLabel", {
@@ -409,7 +408,7 @@ function Speed_Library:CreateWindow(Config)
     BackgroundTransparency = 1,
     BorderSizePixel = 0,
     Position = UDim2.new(0.5, 0, 0.5, 0),
-    Size = ResponsiveSize, -- BAYANGAN IKUT MENGECIL
+    Size = UDim2.new(1, 47, 1, 47),
     ZIndex = 0,
     Name = "DropShadow"
   }, DropShadowHolder)
@@ -421,7 +420,7 @@ function Speed_Library:CreateWindow(Config)
     BorderColor3 = Color3.fromRGB(0, 0, 0),
     BorderSizePixel = 0,
     Position = UDim2.new(0.5, 0, 0.5, 0),
-    Size = ResponsiveSize, -- KOTAK UTAMA IKUT MENGECIL
+    Size = UDim2.new(1, 0, 1, 0),
     Name = "Main"
   }, DropShadow)
 
@@ -431,6 +430,17 @@ function Speed_Library:CreateWindow(Config)
     Color = Custom.ColorRGB,
     Thickness = 0.8
   }, Main)
+
+  local Top = Custom:Create("Frame", {
+    BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+    BackgroundTransparency = 0.999,
+    BorderColor3 = Color3.fromRGB(0, 0, 0),
+    BorderSizePixel = 0,
+    Size = UDim2.new(1, 0, 0, 38),
+    Name = "Top"
+  }, Main)
+
+  Custom:Create("UICorner", {}, Top)
 
   -- Container Pembungkus (Agar tersusun menyamping otomatis)
   local TopLayoutContainer = Custom:Create("Frame", {
@@ -444,7 +454,7 @@ function Speed_Library:CreateWindow(Config)
     FillDirection = Enum.FillDirection.Horizontal,
     SortOrder = Enum.SortOrder.LayoutOrder,
     VerticalAlignment = Enum.VerticalAlignment.Center,
-    Padding = UDim.new(0, 7) -- Jarak antar elemen diperlebar sedikit biar rapi
+    Padding = UDim.new(0, 7)
   }, TopLayoutContainer)
 
   -- 1. LOGO 
@@ -480,7 +490,7 @@ function Speed_Library:CreateWindow(Config)
   local Sep1 = Custom:Create("TextLabel", {
     BackgroundTransparency = 1,
     Font = Enum.Font.GothamBold,
-    Text = "|", -- Diganti jadi garis tegak
+    Text = "|",
     TextColor3 = Color3.fromRGB(150, 150, 150),
     TextSize = 13,
     Size = UDim2.new(0, 0, 1, 0),
@@ -504,7 +514,7 @@ function Speed_Library:CreateWindow(Config)
   local Sep2 = Custom:Create("TextLabel", {
     BackgroundTransparency = 1,
     Font = Enum.Font.GothamBold,
-    Text = "-", -- Tetap strip
+    Text = "-", 
     TextColor3 = Color3.fromRGB(150, 150, 150),
     TextSize = 13,
     Size = UDim2.new(0, 0, 1, 0),
@@ -899,7 +909,6 @@ local Close = Custom:Create("ImageLabel", {
 
   -- ▲▲▲ SAMPAI SINI ▲▲▲
 
-  DropShadowHolder.Size = UDim2.new(0, 115 + TextLabel.TextBounds.X + 1 + TextLabel1.TextBounds.X, 0, 350)
 	MakeDraggable(Top, DropShadowHolder)
 
 
@@ -2481,13 +2490,13 @@ Custom:Create("UIStroke", {
       local Resizer = Custom:Create("TextButton", {
         Name = "Resizer",
         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        BackgroundTransparency = 1, -- Dibuat transparan biar nggak merusak desain
+        BackgroundTransparency = 1, 
         BorderSizePixel = 0,
         Position = UDim2.new(1, -20, 1, -20),
         Size = UDim2.new(0, 20, 0, 20),
         Text = "",
         ZIndex = 50
-      }, Main) -- Ditempelkan ke menu utama
+      }, Main) 
 
       local isResizing = false
       local resizeStart = nil
@@ -2505,13 +2514,11 @@ Custom:Create("UIStroke", {
         if isResizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
           local delta = input.Position - resizeStart
           
-          -- Batas ukuran minimal (biar UI gak rusak kalau kekecilan)
           local newWidth = math.clamp(startSize.X + delta.X, 400, 1200) 
           local newHeight = math.clamp(startSize.Y + delta.Y, 250, 800)
           
           local newSize = UDim2.new(0, newWidth, 0, newHeight)
           
-          -- Mengaplikasikan ukuran baru ke UI
           Main.Size = newSize
           DropShadow.Size = newSize
           DropShadowHolder.Size = newSize
