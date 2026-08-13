@@ -42,7 +42,7 @@ local PremiumFX = {
 }
 
 -- ==========================================
--- [FIX] Semua fungsi helper sekarang LOCAL biar gak collision
+-- Semua fungsi helper sekarang LOCAL biar gak collision
 -- sama script lain yang jalan bareng di executor yang sama.
 -- ==========================================
 
@@ -76,8 +76,6 @@ local function MakeDraggable(topbarobject, object)
   end)
 end
 
--- [FIX] CircleClick jadi local, dan fade pakai TweenService bukan wait() loop manual.
--- Ini bikin ripple effect lebih halus dan gak ngeblock kalau user spam klik cepat.
 local function CircleClick(Button, X, Y)
   task.spawn(function()
     Button.ClipsDescendants = true
@@ -365,7 +363,7 @@ function Speed_Library:CreateWindow(Config)
   local Description = Config[2] or Config.Description or ""
   local TabWidth = Config[3] or Config["Tab Width"] or 120
   local SizeUi = Config[4] or Config.SizeUi or UDim2.fromOffset(650, 400)
-  local Icon = Config[5] or Config.Icon or "" -- [NEW] logo hub, kosongin "" kalau gak mau pakai logo
+  local Icon = Config[5] or Config.Icon or ""
 
   local SpeedHubXGui = Custom:Create("ScreenGui", {
     ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -401,7 +399,8 @@ function Speed_Library:CreateWindow(Config)
   local Main = Custom:Create("Frame", {
     AnchorPoint = Vector2.new(0.5, 0.5),
     BackgroundColor3 = Color3.fromRGB(5, 5, 5),
-    BackgroundTransparency = 0.05,
+    -- [UPDATE] Background lebih transparan (opacity 15%)
+    BackgroundTransparency = 0.15,
     BorderColor3 = Color3.fromRGB(0, 0, 0),
     BorderSizePixel = 0,
     Position = UDim2.new(0.5, 0, 0.5, 0),
@@ -444,7 +443,8 @@ function Speed_Library:CreateWindow(Config)
 
     task.defer(function()
       TweenService:Create(MainScale, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
-      TweenService:Create(Main, TweenInfo.new(0.25), {BackgroundTransparency = 0.05}):Play()
+      -- [UPDATE] Sesuai opacity baru (0.15)
+      TweenService:Create(Main, TweenInfo.new(0.25), {BackgroundTransparency = 0.15}):Play()
     end)
   end
 
@@ -457,7 +457,6 @@ function Speed_Library:CreateWindow(Config)
     Name = "Top"
   }, Main)
 
-  -- [NEW] Logo Hub — cuma dibuat kalau Icon di-isi, biar gak makan tempat pas gak dipakai
   local LogoOffset = 0
   if Icon ~= "" then
     Custom:Create("ImageLabel", {
@@ -474,12 +473,12 @@ function Speed_Library:CreateWindow(Config)
       CornerRadius = UDim.new(0, 5)
     }, Top.LogoIcon)
 
-    LogoOffset = 40 -- lebar logo (22) + jarak lebih lega (18)
+    LogoOffset = 40
   end
 
-  -- [FIX layout] Title sekarang mulai setelah logo (kalau ada)
+  -- [UPDATE] Font Title diganti jadi Montserrat ExtraBold
   local TextLabel = Custom:Create("TextLabel", {
-    Font = Enum.Font.GothamBold,
+    FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold, Enum.FontStyle.Normal),
     Text = Title,
     TextColor3 = Color3.fromRGB(255, 255, 255),
     TextSize = 14,
@@ -494,11 +493,10 @@ function Speed_Library:CreateWindow(Config)
 
   Custom:Create("UICorner", {}, Top)
 
-  -- [FIX layout] Description dipakai sebagai Rank/Version, posisinya ngikutin lebar Title + logo
-  -- Jarak dilebarin (26px) + separator titik kecil biar Title dan Rank/Version gak nempel
+  -- [UPDATE] Font Separator mengikuti font Version (SemiBold)
   if Description ~= "" then
     Custom:Create("TextLabel", {
-      Font = Enum.Font.GothamBold,
+      FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
       Text = "•",
       TextColor3 = Color3.fromRGB(120, 120, 120),
       TextSize = 14,
@@ -511,8 +509,9 @@ function Speed_Library:CreateWindow(Config)
     }, Top)
   end
 
+  -- [UPDATE] Font Version/Description diganti jadi Montserrat SemiBold
   local TextLabel1 = Custom:Create("TextLabel", {
-    Font = Enum.Font.GothamBold,
+    FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
     Text = Description,
     TextColor3 = Custom.ColorRGB,
     TextSize = 14,
@@ -720,7 +719,6 @@ function Speed_Library:CreateWindow(Config)
     Name = "ProfileName"
   }, ProfileBar)
 
-  -- [FIX] pcall sudah ada di kode asli, dipertahankan karena polanya benar
   task.spawn(function()
     local success, content = pcall(function()
       return Players:GetUserThumbnailAsync(Player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
@@ -964,11 +962,6 @@ function Speed_Library:CreateWindow(Config)
     Parent = DropdownFolder
   })
 
-  -- ==========================================
-  -- [REFACTOR] Helper generik buat komponen dengan Title+Content
-  -- dipakai bareng oleh Button/Toggle/Input/Slider/Dropdown.
-  -- Ini motong duplikasi kode + bikin styling gampang diubah di 1 tempat.
-  -- ==========================================
   local function CreateFieldBase(Parent, LayoutOrder, Title, Content, RightPad)
     RightPad = RightPad or 100
 
@@ -1015,7 +1008,6 @@ function Speed_Library:CreateWindow(Config)
     return Base, TitleLabel, ContentLabel
   end
 
-  -- fungsi bantu resize otomatis berdasar tinggi teks Content
   local function BindAutoResize(Base, ContentLabel, OnResize)
     local function Update()
       ContentLabel.TextWrapped = false
@@ -1666,7 +1658,6 @@ function Speed_Library:CreateWindow(Config)
           CornerRadius = UDim.new(0, 2),
         }, SliderInput)
 
-        -- [FIX] Text default sekarang ikut parameter Default, bukan hardcode "90"
         local TextBox = Custom:Create("TextBox", {
           Font = Enum.Font.GothamBold,
           Text = tostring(Default),
@@ -2225,3 +2216,5 @@ function Speed_Library:CreateWindow(Config)
 end
 
 return Speed_Library
+
+tambahin hover ajaa, btw ini hover pas di button/togle nya aja kn? kyk mksdnya kl mau mencet dia ad transparan warna gtu kn? kl gt iyp bnr wkwkkw
