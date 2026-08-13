@@ -2216,5 +2216,3 @@ function Speed_Library:CreateWindow(Config)
 end
 
 return Speed_Library
-
-tambahin hover ajaa, btw ini hover pas di button/togle nya aja kn? kyk mksdnya kl mau mencet dia ad transparan warna gtu kn? kl gt iyp bnr wkwkkw
