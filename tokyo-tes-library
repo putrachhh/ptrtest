@@ -474,7 +474,7 @@ function Speed_Library:CreateWindow(Config)
       CornerRadius = UDim.new(0, 5)
     }, Top.LogoIcon)
 
-    LogoOffset = 30 -- lebar logo (22) + jarak (8)
+    LogoOffset = 40 -- lebar logo (22) + jarak lebih lega (18)
   end
 
   -- [FIX layout] Title sekarang mulai setelah logo (kalau ada)
@@ -495,6 +495,22 @@ function Speed_Library:CreateWindow(Config)
   Custom:Create("UICorner", {}, Top)
 
   -- [FIX layout] Description dipakai sebagai Rank/Version, posisinya ngikutin lebar Title + logo
+  -- Jarak dilebarin (26px) + separator titik kecil biar Title dan Rank/Version gak nempel
+  if Description ~= "" then
+    Custom:Create("TextLabel", {
+      Font = Enum.Font.GothamBold,
+      Text = "•",
+      TextColor3 = Color3.fromRGB(120, 120, 120),
+      TextSize = 14,
+      TextXAlignment = Enum.TextXAlignment.Left,
+      BackgroundTransparency = 1,
+      BorderSizePixel = 0,
+      Size = UDim2.new(0, 12, 1, 0),
+      Position = UDim2.new(0, TextLabel.TextBounds.X + 12 + LogoOffset, 0, 0),
+      Name = "TitleSeparator"
+    }, Top)
+  end
+
   local TextLabel1 = Custom:Create("TextLabel", {
     Font = Enum.Font.GothamBold,
     Text = Description,
@@ -505,8 +521,8 @@ function Speed_Library:CreateWindow(Config)
     BackgroundTransparency = 0.9990000128746033,
     BorderColor3 = Color3.fromRGB(0, 0, 0),
     BorderSizePixel = 0,
-    Size = UDim2.new(1, -(TextLabel.TextBounds.X + 104 + LogoOffset), 1, 0),
-    Position = UDim2.new(0, TextLabel.TextBounds.X + 15 + LogoOffset, 0, 0)
+    Size = UDim2.new(1, -(TextLabel.TextBounds.X + 130 + LogoOffset), 1, 0),
+    Position = UDim2.new(0, TextLabel.TextBounds.X + 28 + LogoOffset, 0, 0)
   }, Top)
 
   local Close = Custom:Create("ImageLabel", {
@@ -827,7 +843,7 @@ function Speed_Library:CreateWindow(Config)
     CloseConfirmGui()
   end)
 
-  DropShadowHolder.Size = UDim2.new(0, 115 + LogoOffset + TextLabel.TextBounds.X + 1 + TextLabel1.TextBounds.X, 0, 350)
+  DropShadowHolder.Size = UDim2.new(0, 140 + LogoOffset + TextLabel.TextBounds.X + 1 + TextLabel1.TextBounds.X, 0, 350)
   MakeDraggable(Top, DropShadowHolder)
 
   local MoreBlur = Custom:Create("Frame", {
