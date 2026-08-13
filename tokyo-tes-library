@@ -32,9 +32,7 @@ end
 
 Custom:EnabledAFK()
 
--- ==========================================
 -- PREMIUM UI SETTINGS (bisa dimatiin gampang kalau ada yang gak cocok)
--- ==========================================
 local PremiumFX = {
   AnimatedBorder = true,
   IntroAnimation = true,
