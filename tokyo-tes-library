@@ -365,6 +365,7 @@ function Speed_Library:CreateWindow(Config)
   local Description = Config[2] or Config.Description or ""
   local TabWidth = Config[3] or Config["Tab Width"] or 120
   local SizeUi = Config[4] or Config.SizeUi or UDim2.fromOffset(650, 400)
+  local Icon = Config[5] or Config.Icon or "" -- [NEW] logo hub, kosongin "" kalau gak mau pakai logo
 
   local SpeedHubXGui = Custom:Create("ScreenGui", {
     ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -456,6 +457,27 @@ function Speed_Library:CreateWindow(Config)
     Name = "Top"
   }, Main)
 
+  -- [NEW] Logo Hub — cuma dibuat kalau Icon di-isi, biar gak makan tempat pas gak dipakai
+  local LogoOffset = 0
+  if Icon ~= "" then
+    Custom:Create("ImageLabel", {
+      Image = Icon,
+      ScaleType = Enum.ScaleType.Fit,
+      AnchorPoint = Vector2.new(0, 0.5),
+      BackgroundTransparency = 1,
+      Position = UDim2.new(0, 10, 0.5, 0),
+      Size = UDim2.new(0, 22, 0, 22),
+      Name = "LogoIcon"
+    }, Top)
+
+    Custom:Create("UICorner", {
+      CornerRadius = UDim.new(0, 5)
+    }, Top.LogoIcon)
+
+    LogoOffset = 30 -- lebar logo (22) + jarak (8)
+  end
+
+  -- [FIX layout] Title sekarang mulai setelah logo (kalau ada)
   local TextLabel = Custom:Create("TextLabel", {
     Font = Enum.Font.GothamBold,
     Text = Title,
@@ -466,12 +488,13 @@ function Speed_Library:CreateWindow(Config)
     BackgroundTransparency = 0.9990000128746033,
     BorderColor3 = Color3.fromRGB(0, 0, 0),
     BorderSizePixel = 0,
-    Size = UDim2.new(1, -100, 1, 0),
-    Position = UDim2.new(0, 10, 0, 0)
+    Size = UDim2.new(1, -100 - LogoOffset, 1, 0),
+    Position = UDim2.new(0, 10 + LogoOffset, 0, 0)
   }, Top)
 
   Custom:Create("UICorner", {}, Top)
 
+  -- [FIX layout] Description dipakai sebagai Rank/Version, posisinya ngikutin lebar Title + logo
   local TextLabel1 = Custom:Create("TextLabel", {
     Font = Enum.Font.GothamBold,
     Text = Description,
@@ -482,8 +505,8 @@ function Speed_Library:CreateWindow(Config)
     BackgroundTransparency = 0.9990000128746033,
     BorderColor3 = Color3.fromRGB(0, 0, 0),
     BorderSizePixel = 0,
-    Size = UDim2.new(1, -(TextLabel.TextBounds.X + 104), 1, 0),
-    Position = UDim2.new(0, TextLabel.TextBounds.X + 15, 0, 0)
+    Size = UDim2.new(1, -(TextLabel.TextBounds.X + 104 + LogoOffset), 1, 0),
+    Position = UDim2.new(0, TextLabel.TextBounds.X + 15 + LogoOffset, 0, 0)
   }, Top)
 
   local Close = Custom:Create("ImageLabel", {
@@ -804,7 +827,7 @@ function Speed_Library:CreateWindow(Config)
     CloseConfirmGui()
   end)
 
-  DropShadowHolder.Size = UDim2.new(0, 115 + TextLabel.TextBounds.X + 1 + TextLabel1.TextBounds.X, 0, 350)
+  DropShadowHolder.Size = UDim2.new(0, 115 + LogoOffset + TextLabel.TextBounds.X + 1 + TextLabel1.TextBounds.X, 0, 350)
   MakeDraggable(Top, DropShadowHolder)
 
   local MoreBlur = Custom:Create("Frame", {
