@@ -32,17 +32,11 @@ end
 
 Custom:EnabledAFK()
 
--- PREMIUM UI SETTINGS (bisa dimatiin gampang kalau ada yang gak cocok)
 local PremiumFX = {
   AnimatedBorder = true,
   IntroAnimation = true,
   HoverEffects = true,
 }
-
--- ==========================================
--- Semua fungsi helper sekarang LOCAL biar gak collision
--- sama script lain yang jalan bareng di executor yang sama.
--- ==========================================
 
 local function MakeDraggable(topbarobject, object)
   local dragging, dragStart, startPos = false, nil, nil
@@ -397,7 +391,6 @@ function Speed_Library:CreateWindow(Config)
   local Main = Custom:Create("Frame", {
     AnchorPoint = Vector2.new(0.5, 0.5),
     BackgroundColor3 = Color3.fromRGB(5, 5, 5),
-    -- [UPDATE] Background lebih transparan (opacity 15%)
     BackgroundTransparency = 0.15,
     BorderColor3 = Color3.fromRGB(0, 0, 0),
     BorderSizePixel = 0,
@@ -441,7 +434,6 @@ function Speed_Library:CreateWindow(Config)
 
     task.defer(function()
       TweenService:Create(MainScale, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
-      -- [UPDATE] Sesuai opacity baru (0.15)
       TweenService:Create(Main, TweenInfo.new(0.25), {BackgroundTransparency = 0.15}):Play()
     end)
   end
@@ -474,7 +466,6 @@ function Speed_Library:CreateWindow(Config)
     LogoOffset = 40
   end
 
-  -- [UPDATE] Font Title diganti jadi Montserrat ExtraBold
   local TextLabel = Custom:Create("TextLabel", {
     FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold, Enum.FontStyle.Normal),
     Text = Title,
@@ -491,7 +482,6 @@ function Speed_Library:CreateWindow(Config)
 
   Custom:Create("UICorner", {}, Top)
 
-  -- [UPDATE] Font Separator mengikuti font Version (SemiBold)
   if Description ~= "" then
     Custom:Create("TextLabel", {
       FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
@@ -507,7 +497,6 @@ function Speed_Library:CreateWindow(Config)
     }, Top)
   end
 
-  -- [UPDATE] Font Version/Description diganti jadi Montserrat SemiBold
   local TextLabel1 = Custom:Create("TextLabel", {
     FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
     Text = Description,
