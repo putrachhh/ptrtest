@@ -823,6 +823,12 @@ function Speed_Library:CreateWindow(Config)
 
   YesBtn.Activated:Connect(function()
     if SpeedHubXGui then SpeedHubXGui:Destroy() end
+    
+    -- [FIX] Hancurkan juga ScreenGui tempat logo Open/Close berada
+    if Open_Close and Open_Close.Parent then 
+      Open_Close.Parent:Destroy() 
+    end
+    
     if not Speed_Library.Unloaded then Speed_Library.Unloaded = true end
   end)
 
