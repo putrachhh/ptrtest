@@ -125,7 +125,7 @@ local function OpenClose()
     Position = UDim2.new(0.1021, 0, 0.0743, 0),
     Size = UDim2.new(0, 45, 0, 45),
     Image = "rbxassetid://116663564072027",
-    Visible = true, -- [FIX] Logo selalu nyala dari awal
+    Visible = true,
   }, ScreenGui)
 
   Custom:Create("UICorner", {
@@ -450,6 +450,51 @@ function Speed_Library:CreateWindow(Config)
     Name = "Top"
   }, Main)
 
+  -- ==========================================
+  -- [NEW] Container Top Bar Info
+  -- ==========================================
+  local InfoContainer = Custom:Create("Frame", {
+    BackgroundTransparency = 1,
+    Size = UDim2.new(0, 200, 1, 0),
+    Position = UDim2.new(1, -210, 0, 0), 
+    Name = "InfoContainer",
+    Parent = Top
+  })
+
+  Custom:Create("UIListLayout", {
+    FillDirection = Enum.FillDirection.Horizontal,
+    HorizontalAlignment = Enum.HorizontalAlignment.Right,
+    VerticalAlignment = Enum.VerticalAlignment.Center,
+    Padding = UDim.new(0, 8),
+    Parent = InfoContainer
+  })
+
+  function Speed_Library:AddTopInfo(Text)
+    local Pill = Custom:Create("Frame", {
+      BackgroundColor3 = Color3.fromRGB(20, 20, 25), 
+      BorderSizePixel = 0,
+      Size = UDim2.new(0, 0, 0, 22),
+      Parent = InfoContainer
+    })
+    
+    Custom:Create("UICorner", { CornerRadius = UDim.new(0, 4) }, Pill)
+    Custom:Create("UIStroke", { Color = Custom.ColorRGB, Thickness = 0.8 }, Pill)
+
+    local PillText = Custom:Create("TextLabel", {
+      Font = Enum.Font.GothamBold,
+      Text = Text,
+      TextColor3 = Color3.fromRGB(220, 220, 220),
+      TextSize = 11,
+      BackgroundTransparency = 1,
+      Size = UDim2.new(1, 0, 1, 0),
+      Parent = Pill
+    })
+
+    Pill.Size = UDim2.new(0, PillText.TextBounds.X + 16, 0, 22)
+    return PillText 
+  end
+  -- ==========================================
+
   local LogoOffset = 0
   if Icon ~= "" then
     Custom:Create("ImageLabel", {
@@ -563,6 +608,42 @@ function Speed_Library:CreateWindow(Config)
   Custom:Create("UICorner", {
     CornerRadius = UDim.new(0, 2)
   }, LayersTab)
+
+  -- ==========================================
+  -- [NEW] Search Bar di Sidebar
+  -- ==========================================
+  local SidebarSearch = Custom:Create("Frame", {
+    BackgroundColor3 = Color3.fromRGB(20, 20, 25),
+    BorderSizePixel = 0,
+    Size = UDim2.new(1, -10, 0, 26),
+    Position = UDim2.new(0, 5, 0, 5),
+    Parent = LayersTab
+  })
+  Custom:Create("UICorner", { CornerRadius = UDim.new(0, 4) }, SidebarSearch)
+  Custom:Create("UIStroke", { Color = Custom.ColorRGB, Thickness = 0.5 }, SidebarSearch)
+
+  local SearchInput = Custom:Create("TextBox", {
+    Font = Enum.Font.Gotham,
+    PlaceholderText = "Search...",
+    Text = "",
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+    TextSize = 11,
+    BackgroundTransparency = 1,
+    Size = UDim2.new(1, -25, 1, 0),
+    Position = UDim2.new(0, 25, 0, 0),
+    TextXAlignment = Enum.TextXAlignment.Left,
+    Parent = SidebarSearch
+  })
+
+  Custom:Create("ImageLabel", {
+    Image = "rbxassetid://6031154871",
+    BackgroundTransparency = 1,
+    Size = UDim2.new(0, 14, 0, 14),
+    Position = UDim2.new(0, 6, 0.5, -7),
+    ImageColor3 = Color3.fromRGB(150, 150, 150),
+    Parent = SidebarSearch
+  })
+  -- ==========================================
 
   Custom:Create("Frame", {
     AnchorPoint = Vector2.new(0.5, 0),
@@ -714,20 +795,20 @@ function Speed_Library:CreateWindow(Config)
       return Players:GetUserThumbnailAsync(Player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
     end)
 
-    if success and content then
+    if success and content and typeof(content) == "string" then
       ProfileAvatar.Image = content
     end
   end)
 
-  ScrollTab.Size = UDim2.new(1, 0, 1, -46)
+  -- [MODIFIED] Posisi ScrollTab Disesuaikan biar nggak nabrak Search Bar
+  ScrollTab.Position = UDim2.new(0, 0, 0, 36)
+  ScrollTab.Size = UDim2.new(1, 0, 1, -82)
 
-  -- [FIX] MinButton sekarang cuma nutup window utama, ga matiin logo toggle
   MinButton.Activated:Connect(function()
     CircleClick(Min, Player:GetMouse().X, Player:GetMouse().Y)
     DropShadowHolder.Visible = false
   end)
 
-  -- [FIX] Logo selalu visible, fungsinya diubah jadi Toggling (Buka/Tutup UI)
   Open_Close.Activated:Connect(function()
     DropShadowHolder.Visible = not DropShadowHolder.Visible
   end)
@@ -824,7 +905,6 @@ function Speed_Library:CreateWindow(Config)
   YesBtn.Activated:Connect(function()
     if SpeedHubXGui then SpeedHubXGui:Destroy() end
     
-    -- [FIX] Hancurkan juga ScreenGui tempat logo Open/Close berada
     if Open_Close and Open_Close.Parent then 
       Open_Close.Parent:Destroy() 
     end
@@ -1516,7 +1596,6 @@ function Speed_Library:CreateWindow(Config)
           Size = UDim2.new(1, 0, 1, 0)
         }, FeatureFrame1)
 
-        -- [FIXED] Hover Effect Button
         if PremiumFX.HoverEffects then
           ButtonButton.MouseEnter:Connect(function()
             TweenService:Create(Button, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
@@ -1592,7 +1671,6 @@ function Speed_Library:CreateWindow(Config)
           CornerRadius = UDim.new(0, 15)
         }, ToggleCircle)
 
-        -- [FIXED] Hover Effect Toggle
         if PremiumFX.HoverEffects then
           ToggleButton.MouseEnter:Connect(function()
             TweenService:Create(Toggle, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
@@ -1719,7 +1797,6 @@ function Speed_Library:CreateWindow(Config)
           Color = Custom.ColorRGB,
         }, SliderCircle)
 
-        -- [FIXED] Hover Effect Slider
         if PremiumFX.HoverEffects then
           Slider.MouseEnter:Connect(function()
             TweenService:Create(Slider, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
@@ -1847,7 +1924,6 @@ function Speed_Library:CreateWindow(Config)
           Name = "InputTextBox"
         }, InputFrame)
 
-        -- [FIXED] Hover Effect Input
         if PremiumFX.HoverEffects then
           InputTextBox.MouseEnter:Connect(function()
             TweenService:Create(Input, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
@@ -1917,7 +1993,6 @@ function Speed_Library:CreateWindow(Config)
           CornerRadius = UDim.new(0, 4)
         }, SelectOptionsFrame)
 
-        -- [FIXED] Hover Effect Dropdown
         if PremiumFX.HoverEffects then
           DropdownButton.MouseEnter:Connect(function()
             TweenService:Create(Dropdown, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
@@ -2185,9 +2260,6 @@ function Speed_Library:CreateWindow(Config)
         return Funcs_Dropdown
       end
 
-      -- ==========================================
-      -- [NEW] KOMPONEN KEYBIND 
-      -- ==========================================
       function Item:AddBind(Config)
         local Title = Config[1] or Config.Title or ""
         local Content = Config[2] or Config.Content or ""
@@ -2247,7 +2319,6 @@ function Speed_Library:CreateWindow(Config)
         UserInputService.InputBegan:Connect(function(input, gameProcessed)
           if isBinding and input.UserInputType == Enum.UserInputType.Keyboard then
             local key = input.KeyCode
-            -- Bisa hapus bind pakai Escape atau Backspace
             if key == Enum.KeyCode.Escape or key == Enum.KeyCode.Backspace then
                 Funcs_Bind.Value = Enum.KeyCode.Unknown
                 BindText.Text = "None"
@@ -2281,9 +2352,6 @@ function Speed_Library:CreateWindow(Config)
     return Sections
   end
 
-  -- ==========================================
-  -- RESIZE UI
-  -- ==========================================
   local Resizer = Custom:Create("TextButton", {
     Name = "Resizer",
     BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -2322,7 +2390,7 @@ function Speed_Library:CreateWindow(Config)
 
       Layers.Size = UDim2.new(1, -(TabWidth + 9 + 18), 1, -59)
       LayersTab.Size = UDim2.new(0, TabWidth, 1, -59)
-      ScrollTab.Size = UDim2.new(1, 0, 1, -46)
+      ScrollTab.Size = UDim2.new(1, 0, 1, -82) 
     end
   end)
 
