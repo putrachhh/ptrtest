@@ -456,7 +456,7 @@ function Speed_Library:CreateWindow(Config)
   local InfoContainer = Custom:Create("Frame", {
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0),
-    Position = UDim2.new(1, -100, 0, 0), -- SUDAH DIGESER KE KIRI BIAR GAK MEPET KANAN
+    Position = UDim2.new(1, -140, 0, 0),
     Size = UDim2.new(0, 400, 1, 0), 
     Name = "InfoContainer",
     Parent = Top
@@ -480,7 +480,6 @@ function Speed_Library:CreateWindow(Config)
     })
     
     Custom:Create("UICorner", { CornerRadius = UDim.new(0, 4) }, Pill)
-    Custom:Create("UIStroke", { Color = Custom.ColorRGB, Thickness = 0.8 }, Pill)
     Custom:Create("UIPadding", { PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8), Parent = Pill })
 
     local PillText = Custom:Create("TextLabel", {
