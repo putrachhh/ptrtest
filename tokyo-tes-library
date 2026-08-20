@@ -417,6 +417,18 @@ function Speed_Library:CreateWindow(Config)
 
   Custom:Create("UICorner", {}, Main)
 
+  -- [FITUR BARU] Layer buat gambar dekorasi (kayak ilustrasi anime transparan di
+  -- Napoleon). ClipsDescendants biar gambarnya kepotong rapi ngikutin rounded corner
+  -- window, ZIndex 0 + dibuat paling awal supaya render di BELAKANG semua UI lain
+  -- (search bar, tab, konten, dll tetap kebaca jelas di atasnya).
+  local ArtClipFrame = Custom:Create("Frame", {
+    BackgroundTransparency = 1,
+    ClipsDescendants = true,
+    Size = UDim2.new(1, 0, 1, 0),
+    ZIndex = 0,
+    Name = "ArtClipFrame"
+  }, Main)
+
   local MainStroke = Custom:Create("UIStroke", {
     Color = Custom.ColorRGB,
     Thickness = PremiumFX.AnimatedBorder and 1 or 0.8
@@ -469,7 +481,8 @@ function Speed_Library:CreateWindow(Config)
   local InfoContainer = Custom:Create("Frame", {
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0),
-    Position = UDim2.new(1, -100, 0, 0), -- SUDAH DIGESER KE KIRI BIAR GAK MEPET KANAN
+    Position = UDim2.new(1, -130, 0, 0), -- [FIX] Digeser lebih jauh dari pojok kanan (dulu -100),
+                                          -- biar gak ngumpul mepet ke tombol minimize/close.
     Size = UDim2.new(0, 400, 1, 0), 
     Name = "InfoContainer",
     Parent = Top
@@ -484,30 +497,94 @@ function Speed_Library:CreateWindow(Config)
   })
 
   function Speed_Library:AddTopInfo(Text)
+    -- [PREMIUM STYLE] Sebelumnya pill kecil (22px), fill nyaris hitam polos (20,20,25),
+    -- border tipis 0.8px -> kesannya nempel/kurang "berbobot". Sekarang dibikin lebih
+    -- besar, ada gradient tipis pakai warna accent (Custom.ColorRGB), border lebih tebal
+    -- + sedikit glow, biar keliatan kayak badge premium bukan sekadar label abu-abu.
     local Pill = Custom:Create("Frame", {
-      BackgroundColor3 = Color3.fromRGB(20, 20, 25), 
+      BackgroundColor3 = Color3.fromRGB(24, 24, 30),
       BorderSizePixel = 0,
-      AutomaticSize = Enum.AutomaticSize.X, 
-      Size = UDim2.new(0, 0, 0, 22),
+      AutomaticSize = Enum.AutomaticSize.X,
+      Size = UDim2.new(0, 0, 0, 26),
       Parent = InfoContainer
     })
-    
-    Custom:Create("UICorner", { CornerRadius = UDim.new(0, 4) }, Pill)
-    Custom:Create("UIStroke", { Color = Custom.ColorRGB, Thickness = 0.8 }, Pill)
-    Custom:Create("UIPadding", { PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8), Parent = Pill })
+
+    Custom:Create("UICorner", { CornerRadius = UDim.new(0, 8) }, Pill)
+
+    local PillStroke = Custom:Create("UIStroke", {
+      Color = Custom.ColorRGB,
+      Thickness = 1.1,
+      Transparency = 0.25
+    }, Pill)
+
+    Custom:Create("UIGradient", {
+      Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Custom.ColorRGB),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(24, 24, 30))
+      }),
+      Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.82),
+        NumberSequenceKeypoint.new(1, 1)
+      }),
+      Rotation = 15
+    }, Pill)
+
+    Custom:Create("UIPadding", { PaddingLeft = UDim.new(0, 12), PaddingRight = UDim.new(0, 12), Parent = Pill })
 
     local PillText = Custom:Create("TextLabel", {
       Font = Enum.Font.GothamBold,
       Text = Text,
-      TextColor3 = Color3.fromRGB(220, 220, 220),
-      TextSize = 11,
+      TextColor3 = Color3.fromRGB(235, 235, 235),
+      TextSize = 12,
       AutomaticSize = Enum.AutomaticSize.X,
       BackgroundTransparency = 1,
       Size = UDim2.new(0, 0, 1, 0),
       Parent = Pill
     })
 
+    -- Efek hover halus, biar konsisten sama item lain yang udah di-smooth-in sebelumnya.
+    if PremiumFX.HoverEffects then
+      local PillButton = Custom:Create("TextButton", {
+        Text = "", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Parent = Pill
+      })
+      PillButton.MouseEnter:Connect(function()
+        TweenService:Create(PillStroke, TweenInfo.new(0.15), {Transparency = 0}):Play()
+      end)
+      PillButton.MouseLeave:Connect(function()
+        TweenService:Create(PillStroke, TweenInfo.new(0.15), {Transparency = 0.25}):Play()
+      end)
+    end
+
     return PillText 
+  end
+
+  -- [FITUR BARU] Pasang gambar dekorasi transparan di background window, kayak
+  -- ilustrasi anime yang dipakai Napoleon. ImageId WAJIB punya lu sendiri (upload
+  -- ke Roblox lewat akun lu, terus pakai "rbxassetid://xxxxxxxx") -- Assistant AI
+  -- gak bisa nyediain/generate gambar karakternya, itu karya orang lain.
+  --
+  -- Config opsional:
+  --   Transparency (0-1, default 0.4)  -> makin gede makin transparan/samar
+  --   Size   (UDim2, default 280x280)
+  --   Position (UDim2, default nempel pojok kanan bawah window)
+  --   AnchorPoint (Vector2, default (1,1) = pojok kanan bawah)
+  function Speed_Library:SetCharacterArt(ImageId, Config)
+    Config = Config or {}
+
+    local Art = Custom:Create("ImageLabel", {
+      Image = ImageId or "",
+      ImageTransparency = Config.Transparency or 0.4,
+      ScaleType = Enum.ScaleType.Fit,
+      BackgroundTransparency = 1,
+      AnchorPoint = Config.AnchorPoint or Vector2.new(1, 1),
+      Position = Config.Position or UDim2.new(1, 20, 1, 20),
+      Size = Config.Size or UDim2.new(0, 280, 0, 280),
+      ZIndex = 0,
+      Name = "CharacterArt",
+      Parent = ArtClipFrame
+    })
+
+    return Art
   end
 
   -- ==========================================
