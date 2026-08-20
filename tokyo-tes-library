@@ -373,21 +373,8 @@ function Speed_Library:CreateWindow(Config)
     Size = ResponsiveSize,
     ZIndex = 0,
     Name = "DropShadowHolder",
-    -- [SMOOTH FIX] AnchorPoint dipindah ke tengah (0.5, 0.5) supaya window bisa
-    -- di-scale-in/out lewat UIScale di bawah TANPA kelihatan geser ke pojok kiri
-    -- atas (yang bakal kejadian kalau anchor tetap (0,0) pas Scale-nya ditween).
-    AnchorPoint = Vector2.new(0.5, 0.5),
-    Position = UDim2.new(0, SpeedHubXGui.AbsoluteSize.X // 2, 0, SpeedHubXGui.AbsoluteSize.Y // 2)
+    Position = UDim2.new(0, (SpeedHubXGui.AbsoluteSize.X // 2 - ResponsiveSize.X.Offset // 2), 0, (SpeedHubXGui.AbsoluteSize.Y // 2 - ResponsiveSize.Y.Offset // 2))
   }, SpeedHubXGui)
-
-  -- [SMOOTH FIX] UIScale dipakai buat animasi buka/tutup window (lihat AnimateWindowOpen/
-  -- AnimateWindowClose di bawah). Nge-scale lewat UIScale gak ganggu layout UDim2 persen
-  -- yang udah ada di semua child (beda dari nge-tween Size langsung, yang bisa bikin
-  -- konten dalemnya distorsi kalau ada elemen berbasis Offset).
-  local WindowUIScale = Custom:Create("UIScale", {
-    Scale = 1,
-    Name = "WindowUIScale"
-  }, DropShadowHolder)
 
   local DropShadow = Custom:Create("ImageLabel", {
     Image = "",
@@ -451,6 +438,52 @@ function Speed_Library:CreateWindow(Config)
     task.defer(function()
       TweenService:Create(MainScale, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
       TweenService:Create(Main, TweenInfo.new(0.25), {BackgroundTransparency = 0.15}):Play()
+    end)
+  end
+
+  -- ==========================================
+  -- SMOOTH WINDOW OPEN/CLOSE (dipakai ulang tiap kali GUI dibuka/ditutup,
+  -- bukan cuma sekali pas load pertama). Sebelumnya minimize & tombol
+  -- buka/tutup langsung set "Visible" instan -> window "pop" tanpa animasi.
+  -- ==========================================
+  local WindowIsOpen = true
+  local WindowAnimBusy = false
+
+  local function AnimateWindowOpen()
+    if WindowIsOpen or WindowAnimBusy then return end
+    WindowAnimBusy = true
+    WindowIsOpen = true
+
+    DropShadowHolder.Visible = true
+    MainScale.Scale = 0.85
+    Main.BackgroundTransparency = 1
+
+    local scaleTween = TweenService:Create(MainScale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1})
+    local fadeTween  = TweenService:Create(Main, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0.15})
+
+    scaleTween:Play()
+    fadeTween:Play()
+    fadeTween.Completed:Connect(function()
+      WindowAnimBusy = false
+    end)
+  end
+
+  local function AnimateWindowClose()
+    if (not WindowIsOpen) or WindowAnimBusy then return end
+    WindowAnimBusy = true
+    WindowIsOpen = false
+
+    local scaleTween = TweenService:Create(MainScale, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = 0.85})
+    local fadeTween  = TweenService:Create(Main, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {BackgroundTransparency = 1})
+
+    scaleTween:Play()
+    fadeTween:Play()
+    fadeTween.Completed:Connect(function()
+      DropShadowHolder.Visible = false
+      -- reset biar siap dianimasikan lagi pas dibuka berikutnya
+      MainScale.Scale = 1
+      Main.BackgroundTransparency = 0.15
+      WindowAnimBusy = false
     end)
   end
 
@@ -716,24 +749,6 @@ function Speed_Library:CreateWindow(Config)
     EasingStyle = Enum.EasingStyle.Quad
   }, LayersFolder)
 
-  -- [SMOOTH FIX] JumpToIndex() switches page INSTANTLY, ignoring TweenTime/EasingStyle
-  -- set above entirely. Next()/Previous() are the only methods that actually animate,
-  -- so we step toward the target index using those instead -> tab switch now slides
-  -- smoothly like the config above always intended.
-  local function AnimatedGoToTab(TargetIndex)
-    local CurrentIndex = LayersPageLayout.CurrentPage.LayoutOrder
-    if TargetIndex == CurrentIndex then return end
-    if TargetIndex > CurrentIndex then
-      for _ = CurrentIndex, TargetIndex - 1 do
-        LayersPageLayout:Next()
-      end
-    else
-      for _ = CurrentIndex, TargetIndex + 1, -1 do
-        LayersPageLayout:Previous()
-      end
-    end
-  end
-
   local ScrollTab = Custom:Create("ScrollingFrame", {
     CanvasSize = UDim2.new(0, 0, 2.10000002, 0),
     ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0),
@@ -826,33 +841,13 @@ function Speed_Library:CreateWindow(Config)
     end
   end)
 
-  -- [SMOOTH FIX] Sebelumnya minimize/reopen cuma set .Visible langsung -> window
-  -- ilang/muncul dalam 1 frame, kesannya patah. Sekarang di-scale kecil + fade dulu
-  -- lewat WindowUIScale & DropShadow (dibuat di atas), baru Visible di-toggle setelah
-  -- animasinya kelar.
-  local function AnimateWindowClose()
-    TweenService:Create(WindowUIScale, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = 0.85}):Play()
-    TweenService:Create(DropShadow, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {ImageTransparency = 1}):Play()
-    task.delay(0.22, function()
-      DropShadowHolder.Visible = false
-    end)
-  end
-
-  local function AnimateWindowOpen()
-    DropShadowHolder.Visible = true
-    WindowUIScale.Scale = 0.85
-    DropShadow.ImageTransparency = 1
-    TweenService:Create(WindowUIScale, TweenInfo.new(0.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
-    TweenService:Create(DropShadow, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageTransparency = 0.5}):Play()
-  end
-
   MinButton.Activated:Connect(function()
     CircleClick(Min, Player:GetMouse().X, Player:GetMouse().Y)
     AnimateWindowClose()
   end)
 
   Open_Close.Activated:Connect(function()
-    if DropShadowHolder.Visible then
+    if WindowIsOpen then
       AnimateWindowClose()
     else
       AnimateWindowOpen()
@@ -1284,7 +1279,7 @@ function Speed_Library:CreateWindow(Config)
         _TabT:Play()
         _FTween:Play()
 
-        AnimatedGoToTab(Tab.LayoutOrder)
+        LayersPageLayout:JumpToIndex(Tab.LayoutOrder)
 
         task.wait(0.05)
         NameTab.Text = _Name
@@ -1454,10 +1449,10 @@ function Speed_Library:CreateWindow(Config)
             end
           end
 
-          TweenService:Create(FeatureFrame, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = 90}):Play()
-          TweenService:Create(Section, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, 1, 0, SectionSizeYWitdh)}):Play()
-          TweenService:Create(SectionAdd, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 0, SectionSizeYWitdh - 38)}):Play()
-          TweenService:Create(SectionDecideFrame, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 0, 2)}):Play()
+          TweenService:Create(FeatureFrame, TweenInfo.new(0.1), {Rotation = 90}):Play()
+          TweenService:Create(Section, TweenInfo.new(0.1), {Size = UDim2.new(1, 1, 0, SectionSizeYWitdh)}):Play()
+          TweenService:Create(SectionAdd, TweenInfo.new(0.1), {Size = UDim2.new(1, 0, 0, SectionSizeYWitdh - 38)}):Play()
+          TweenService:Create(SectionDecideFrame, TweenInfo.new(0.1), {Size = UDim2.new(1, 0, 0, 2)}):Play()
 
           task.wait(0.5)
           UpdateSizeScroll()
@@ -1472,12 +1467,12 @@ function Speed_Library:CreateWindow(Config)
         CircleClick(SectionButton, Player:GetMouse().X, Player:GetMouse().Y)
 
         if OpenSection then
-          TweenService:Create(FeatureFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Rotation = 0}):Play()
-          TweenService:Create(Section, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(1, 1, 0, 30)}):Play()
-          TweenService:Create(SectionDecideFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 2)}):Play()
+          TweenService:Create(FeatureFrame, TweenInfo.new(0.1), {Rotation = 0}):Play()
+          TweenService:Create(Section, TweenInfo.new(0.1), {Size = UDim2.new(1, 1, 0, 30)}):Play()
+          TweenService:Create(SectionDecideFrame, TweenInfo.new(0.1), {Size = UDim2.new(0, 0, 0, 2)}):Play()
 
           OpenSection = false
-          task.wait(0.2)
+          task.wait(0.1)
           UpdateSizeScroll()
         else
           OpenSection = true
