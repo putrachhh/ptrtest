@@ -451,12 +451,12 @@ function Speed_Library:CreateWindow(Config)
   }, Main)
 
   -- ==========================================
-  -- TOP BAR INFO CONTAINER (FIXED POSISI & UKURAN)
+  -- TOP BAR INFO CONTAINER (FIXED POSISI LEBIH KE KIRI)
   -- ==========================================
   local InfoContainer = Custom:Create("Frame", {
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0),
-    Position = UDim2.new(1, -70, 0, 0), 
+    Position = UDim2.new(1, -100, 0, 0), -- SUDAH DIGESER KE KIRI BIAR GAK MEPET KANAN
     Size = UDim2.new(0, 400, 1, 0), 
     Name = "InfoContainer",
     Parent = Top
@@ -498,7 +498,7 @@ function Speed_Library:CreateWindow(Config)
   end
 
   -- ==========================================
-  -- AUTO-LAYOUT JUDUL (ANTI NUMPUK & SUPPORT WARNA PINK)
+  -- AUTO-LAYOUT JUDUL (TANPA TITIK PUTIH)
   -- ==========================================
   local TopTitleContainer = Custom:Create("Frame", {
     BackgroundTransparency = 1,
@@ -512,7 +512,7 @@ function Speed_Library:CreateWindow(Config)
     FillDirection = Enum.FillDirection.Horizontal,
     HorizontalAlignment = Enum.HorizontalAlignment.Left,
     VerticalAlignment = Enum.VerticalAlignment.Center,
-    Padding = UDim.new(0, 8),
+    Padding = UDim.new(0, 10), -- JARAK ANTARA TOKYO HUB DAN NAMA GAME
     Parent = TopTitleContainer
   })
 
@@ -540,17 +540,7 @@ function Speed_Library:CreateWindow(Config)
   })
 
   if Description ~= "" then
-    Custom:Create("TextLabel", {
-      FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
-      Text = "•",
-      TextColor3 = Color3.fromRGB(120, 120, 120),
-      TextSize = 14,
-      AutomaticSize = Enum.AutomaticSize.X,
-      BackgroundTransparency = 1,
-      Size = UDim2.new(0, 0, 0, 22),
-      Name = "TitleSeparator",
-      Parent = TopTitleContainer
-    })
+    -- TITIK PUTIH (TITLE SEPARATOR) SUDAH DIHAPUS SEPENUHNYA
 
     Custom:Create("TextLabel", {
       FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
