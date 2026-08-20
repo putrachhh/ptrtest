@@ -370,10 +370,10 @@ function Speed_Library:CreateWindow(Config)
   local DropShadowHolder = Custom:Create("Frame", {
     BackgroundTransparency = 1,
     BorderSizePixel = 0,
-    Size = UDim2.new(0, 455, 0, 350),
+    Size = ResponsiveSize,
     ZIndex = 0,
     Name = "DropShadowHolder",
-    Position = UDim2.new(0, (SpeedHubXGui.AbsoluteSize.X // 2 - 455 // 2), 0, (SpeedHubXGui.AbsoluteSize.Y // 2 - 350 // 2))
+    Position = UDim2.new(0, (SpeedHubXGui.AbsoluteSize.X // 2 - ResponsiveSize.X.Offset // 2), 0, (SpeedHubXGui.AbsoluteSize.Y // 2 - ResponsiveSize.Y.Offset // 2))
   }, SpeedHubXGui)
 
   local DropShadow = Custom:Create("ImageLabel", {
@@ -386,7 +386,7 @@ function Speed_Library:CreateWindow(Config)
     BackgroundTransparency = 1,
     BorderSizePixel = 0,
     Position = UDim2.new(0.5, 0, 0.5, 0),
-    Size = ResponsiveSize,
+    Size = UDim2.new(1, 0, 1, 0),
     ZIndex = 0,
     Name = "DropShadow"
   }, DropShadowHolder)
@@ -398,7 +398,7 @@ function Speed_Library:CreateWindow(Config)
     BorderColor3 = Color3.fromRGB(0, 0, 0),
     BorderSizePixel = 0,
     Position = UDim2.new(0.5, 0, 0.5, 0),
-    Size = ResponsiveSize,
+    Size = UDim2.new(1, 0, 1, 0),
     Name = "Main"
   }, DropShadow)
 
@@ -443,7 +443,7 @@ function Speed_Library:CreateWindow(Config)
 
   local Top = Custom:Create("Frame", {
     BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-    BackgroundTransparency = 0.9990000128746033,
+    BackgroundTransparency = 0.999,
     BorderColor3 = Color3.fromRGB(0, 0, 0),
     BorderSizePixel = 0,
     Size = UDim2.new(1, 0, 0, 38),
@@ -451,21 +451,22 @@ function Speed_Library:CreateWindow(Config)
   }, Main)
 
   -- ==========================================
-  -- [NEW] Container Top Bar Info
+  -- TOP BAR INFO CONTAINER (FIXED POSISI & UKURAN)
   -- ==========================================
   local InfoContainer = Custom:Create("Frame", {
     BackgroundTransparency = 1,
-    Size = UDim2.new(0, 200, 1, 0),
-    Position = UDim2.new(1, -210, 0, 0), 
+    AnchorPoint = Vector2.new(1, 0),
+    Position = UDim2.new(1, -70, 0, 0), 
+    Size = UDim2.new(0, 400, 1, 0), 
     Name = "InfoContainer",
     Parent = Top
   })
 
   Custom:Create("UIListLayout", {
     FillDirection = Enum.FillDirection.Horizontal,
-    HorizontalAlignment = Enum.HorizontalAlignment.Right,
+    HorizontalAlignment = Enum.HorizontalAlignment.Right, 
     VerticalAlignment = Enum.VerticalAlignment.Center,
-    Padding = UDim.new(0, 8),
+    Padding = UDim.new(0, 6),
     Parent = InfoContainer
   })
 
@@ -473,62 +474,70 @@ function Speed_Library:CreateWindow(Config)
     local Pill = Custom:Create("Frame", {
       BackgroundColor3 = Color3.fromRGB(20, 20, 25), 
       BorderSizePixel = 0,
+      AutomaticSize = Enum.AutomaticSize.X, 
       Size = UDim2.new(0, 0, 0, 22),
       Parent = InfoContainer
     })
     
     Custom:Create("UICorner", { CornerRadius = UDim.new(0, 4) }, Pill)
     Custom:Create("UIStroke", { Color = Custom.ColorRGB, Thickness = 0.8 }, Pill)
+    Custom:Create("UIPadding", { PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8), Parent = Pill })
 
     local PillText = Custom:Create("TextLabel", {
       Font = Enum.Font.GothamBold,
       Text = Text,
       TextColor3 = Color3.fromRGB(220, 220, 220),
       TextSize = 11,
+      AutomaticSize = Enum.AutomaticSize.X,
       BackgroundTransparency = 1,
-      Size = UDim2.new(1, 0, 1, 0),
+      Size = UDim2.new(0, 0, 1, 0),
       Parent = Pill
     })
 
-    Pill.Size = UDim2.new(0, PillText.TextBounds.X + 16, 0, 22)
     return PillText 
   end
-  -- ==========================================
 
-  local LogoOffset = 0
+  -- ==========================================
+  -- AUTO-LAYOUT JUDUL (ANTI NUMPUK & SUPPORT WARNA PINK)
+  -- ==========================================
+  local TopTitleContainer = Custom:Create("Frame", {
+    BackgroundTransparency = 1,
+    Position = UDim2.new(0, 10, 0, 0),
+    Size = UDim2.new(1, -250, 1, 0),
+    Name = "TopTitleContainer",
+    Parent = Top
+  })
+
+  Custom:Create("UIListLayout", {
+    FillDirection = Enum.FillDirection.Horizontal,
+    HorizontalAlignment = Enum.HorizontalAlignment.Left,
+    VerticalAlignment = Enum.VerticalAlignment.Center,
+    Padding = UDim.new(0, 8),
+    Parent = TopTitleContainer
+  })
+
   if Icon ~= "" then
-    Custom:Create("ImageLabel", {
+    local LogoIcon = Custom:Create("ImageLabel", {
       Image = Icon,
       ScaleType = Enum.ScaleType.Fit,
-      AnchorPoint = Vector2.new(0, 0.5),
       BackgroundTransparency = 1,
-      Position = UDim2.new(0, 10, 0.5, 0),
       Size = UDim2.new(0, 22, 0, 22),
-      Name = "LogoIcon"
-    }, Top)
-
-    Custom:Create("UICorner", {
-      CornerRadius = UDim.new(0, 5)
-    }, Top.LogoIcon)
-
-    LogoOffset = 40
+      Name = "LogoIcon",
+      Parent = TopTitleContainer
+    })
+    Custom:Create("UICorner", { CornerRadius = UDim.new(0, 5) }, LogoIcon)
   end
 
-  local TextLabel = Custom:Create("TextLabel", {
+  Custom:Create("TextLabel", {
     FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold, Enum.FontStyle.Normal),
     Text = Title,
     TextColor3 = Color3.fromRGB(255, 255, 255),
     TextSize = 14,
-    TextXAlignment = Enum.TextXAlignment.Left,
-    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-    BackgroundTransparency = 0.9990000128746033,
-    BorderColor3 = Color3.fromRGB(0, 0, 0),
-    BorderSizePixel = 0,
-    Size = UDim2.new(1, -100 - LogoOffset, 1, 0),
-    Position = UDim2.new(0, 10 + LogoOffset, 0, 0)
-  }, Top)
-
-  Custom:Create("UICorner", {}, Top)
+    AutomaticSize = Enum.AutomaticSize.X,
+    BackgroundTransparency = 1,
+    Size = UDim2.new(0, 0, 0, 22),
+    Parent = TopTitleContainer
+  })
 
   if Description ~= "" then
     Custom:Create("TextLabel", {
@@ -536,28 +545,24 @@ function Speed_Library:CreateWindow(Config)
       Text = "•",
       TextColor3 = Color3.fromRGB(120, 120, 120),
       TextSize = 14,
-      TextXAlignment = Enum.TextXAlignment.Left,
+      AutomaticSize = Enum.AutomaticSize.X,
       BackgroundTransparency = 1,
-      BorderSizePixel = 0,
-      Size = UDim2.new(0, 12, 1, 0),
-      Position = UDim2.new(0, TextLabel.TextBounds.X + 12 + LogoOffset, 0, 0),
-      Name = "TitleSeparator"
-    }, Top)
-  end
+      Size = UDim2.new(0, 0, 0, 22),
+      Name = "TitleSeparator",
+      Parent = TopTitleContainer
+    })
 
-  local TextLabel1 = Custom:Create("TextLabel", {
-    FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
-    Text = Description,
-    TextColor3 = Custom.ColorRGB,
-    TextSize = 14,
-    TextXAlignment = Enum.TextXAlignment.Left,
-    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-    BackgroundTransparency = 0.9990000128746033,
-    BorderColor3 = Color3.fromRGB(0, 0, 0),
-    BorderSizePixel = 0,
-    Size = UDim2.new(1, -(TextLabel.TextBounds.X + 130 + LogoOffset), 1, 0),
-    Position = UDim2.new(0, TextLabel.TextBounds.X + 28 + LogoOffset, 0, 0)
-  }, Top)
+    Custom:Create("TextLabel", {
+      FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
+      Text = Description,
+      TextColor3 = Custom.ColorRGB,
+      TextSize = 14,
+      AutomaticSize = Enum.AutomaticSize.X,
+      BackgroundTransparency = 1,
+      Size = UDim2.new(0, 0, 0, 22),
+      Parent = TopTitleContainer
+    })
+  end
 
   local Close = Custom:Create("ImageLabel", {
     Image = "rbxassetid://10747384394",
@@ -597,7 +602,7 @@ function Speed_Library:CreateWindow(Config)
 
   local LayersTab = Custom:Create("Frame", {
     BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-    BackgroundTransparency = 0.9990000128746033,
+    BackgroundTransparency = 0.999,
     BorderColor3 = Color3.fromRGB(0, 0, 0),
     BorderSizePixel = 0,
     Position = UDim2.new(0, 9, 0, 50),
@@ -610,7 +615,7 @@ function Speed_Library:CreateWindow(Config)
   }, LayersTab)
 
   -- ==========================================
-  -- [NEW] Search Bar di Sidebar
+  -- SEARCH BAR SIDEBAR
   -- ==========================================
   local SidebarSearch = Custom:Create("Frame", {
     BackgroundColor3 = Color3.fromRGB(20, 20, 25),
@@ -643,7 +648,6 @@ function Speed_Library:CreateWindow(Config)
     ImageColor3 = Color3.fromRGB(150, 150, 150),
     Parent = SidebarSearch
   })
-  -- ==========================================
 
   Custom:Create("Frame", {
     AnchorPoint = Vector2.new(0.5, 0),
@@ -658,7 +662,7 @@ function Speed_Library:CreateWindow(Config)
 
   local Layers = Custom:Create("Frame", {
     BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-    BackgroundTransparency = 0.9990000128746033,
+    BackgroundTransparency = 0.999,
     BorderColor3 = Color3.fromRGB(0, 0, 0),
     BorderSizePixel = 0,
     Position = UDim2.new(0, TabWidth + 18, 0, 50),
@@ -678,7 +682,7 @@ function Speed_Library:CreateWindow(Config)
     TextWrapped = true,
     TextXAlignment = Enum.TextXAlignment.Left,
     BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-    BackgroundTransparency = 0.9990000128746033,
+    BackgroundTransparency = 0.999,
     BorderColor3 = Color3.fromRGB(0, 0, 0),
     BorderSizePixel = 0,
     Size = UDim2.new(1, 0, 0, 30),
@@ -688,7 +692,7 @@ function Speed_Library:CreateWindow(Config)
   local LayersReal = Custom:Create("Frame", {
     AnchorPoint = Vector2.new(0, 1),
     BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-    BackgroundTransparency = 0.9990000128746033,
+    BackgroundTransparency = 0.999,
     BorderColor3 = Color3.fromRGB(0, 0, 0),
     BorderSizePixel = 0,
     ClipsDescendants = true,
@@ -715,10 +719,11 @@ function Speed_Library:CreateWindow(Config)
     ScrollBarThickness = 0,
     Active = true,
     BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-    BackgroundTransparency = 0.9990000128746033,
+    BackgroundTransparency = 0.999,
     BorderColor3 = Color3.fromRGB(0, 0, 0),
     BorderSizePixel = 0,
-    Size = UDim2.new(1, 0, 1, -10),
+    Position = UDim2.new(0, 0, 0, 36),
+    Size = UDim2.new(1, 0, 1, -82),
     Name = "ScrollTab"
   }, LayersTab)
 
@@ -799,10 +804,6 @@ function Speed_Library:CreateWindow(Config)
       ProfileAvatar.Image = content
     end
   end)
-
-  -- [MODIFIED] Posisi ScrollTab Disesuaikan biar nggak nabrak Search Bar
-  ScrollTab.Position = UDim2.new(0, 0, 0, 36)
-  ScrollTab.Size = UDim2.new(1, 0, 1, -82)
 
   MinButton.Activated:Connect(function()
     CircleClick(Min, Player:GetMouse().X, Player:GetMouse().Y)
@@ -904,11 +905,9 @@ function Speed_Library:CreateWindow(Config)
 
   YesBtn.Activated:Connect(function()
     if SpeedHubXGui then SpeedHubXGui:Destroy() end
-    
     if Open_Close and Open_Close.Parent then 
       Open_Close.Parent:Destroy() 
     end
-    
     if not Speed_Library.Unloaded then Speed_Library.Unloaded = true end
   end)
 
@@ -916,7 +915,6 @@ function Speed_Library:CreateWindow(Config)
     CloseConfirmGui()
   end)
 
-  DropShadowHolder.Size = UDim2.new(0, 140 + LogoOffset + TextLabel.TextBounds.X + 1 + TextLabel1.TextBounds.X, 0, 350)
   MakeDraggable(Top, DropShadowHolder)
 
   local MoreBlur = Custom:Create("Frame", {
@@ -1749,7 +1747,7 @@ function Speed_Library:CreateWindow(Config)
           TextSize = 13,
           TextWrapped = true,
           BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-          BackgroundTransparency = 0.9990000128746033,
+          BackgroundTransparency = 0.999,
           BorderColor3 = Color3.fromRGB(0, 0, 0),
           BorderSizePixel = 0,
           Position = UDim2.new(0, -1, 0, 0),
@@ -1759,7 +1757,7 @@ function Speed_Library:CreateWindow(Config)
         local SliderFrame = Custom:Create("Frame", {
           AnchorPoint = Vector2.new(1, 0.5),
           BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-          BackgroundTransparency = 0.800000011920929,
+          BackgroundTransparency = 0.8,
           BorderColor3 = Color3.fromRGB(0, 0, 0),
           BorderSizePixel = 0,
           Position = UDim2.new(1, -20, 0.5, 0),
@@ -1775,7 +1773,7 @@ function Speed_Library:CreateWindow(Config)
           BorderColor3 = Color3.fromRGB(0, 0, 0),
           BorderSizePixel = 0,
           Position = UDim2.new(0, 0, 0.5, 0),
-          Size = UDim2.new(0.899999976, 0, 0, 1),
+          Size = UDim2.new(0.9, 0, 0, 1),
           Name = "SliderDraggable",
         }, SliderFrame)
 
@@ -1843,7 +1841,6 @@ function Speed_Library:CreateWindow(Config)
             local CurrPosX = Input.Position.X
             if CurrPosX ~= _LastX then
               _LastX = CurrPosX
-
               local SizeScale = math.clamp((CurrPosX - SliderFrame.AbsolutePosition.X) / SliderFrame.AbsoluteSize.X, 0, 1)
               Funcs_Slider:Set(Min + ((Max - Min) * SizeScale))
             end
@@ -2224,31 +2221,25 @@ function Speed_Library:CreateWindow(Config)
 
           local function UpdateCanvasSize()
             local OffsetY = 0
-
             for _, child in ipairs(ScrollSelect:GetChildren()) do
               if child.Name ~= "UIListLayout" and child.Name ~= "SearchBar" then
                 OffsetY = OffsetY + 5 + child.Size.Y.Offset
               end
             end
-
             ScrollSelect.CanvasSize = UDim2.new(0, 0, 0, OffsetY)
           end
 
           UpdateCanvasSize()
-
           DropCount += 1
         end
 
         function Funcs_Dropdown:Refresh(RefreshList, Selecting)
           RefreshList = RefreshList or {}
           Selecting = Selecting or {}
-
           Funcs_Dropdown:Clear()
-
           for _, Drop in ipairs(RefreshList) do
             Funcs_Dropdown:AddOption(Drop)
           end
-
           Funcs_Dropdown.Options = RefreshList
           Funcs_Dropdown:Set(Selecting)
         end
