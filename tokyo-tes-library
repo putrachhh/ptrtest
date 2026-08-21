@@ -6,7 +6,7 @@ local UserInputService = game:GetService("UserInputService")
 local VirtualUser = game:GetService("VirtualUser")
 
 local Custom = {} do
-  Custom.ColorRGB = Color3.fromRGB(222, 9, 231)
+  Custom.ColorRGB = Color3.fromRGB(190, 20, 130)
   function Custom:Create(Name, Properties, Parent)
     local _instance = Instance.new(Name)
 
@@ -357,7 +357,7 @@ function Speed_Library:CreateWindow(Config)
   local Title = Config[1] or Config.Title or ""
   local Description = Config[2] or Config.Description or ""
   local TabWidth = Config[3] or Config["Tab Width"] or 120
-  local SizeUi = Config[4] or Config.SizeUi or UDim2.fromOffset(630, 390)
+  local SizeUi = Config[4] or Config.SizeUi or UDim2.fromOffset(650, 400)
   local Icon = Config[5] or Config.Icon or ""
 
   local SpeedHubXGui = Custom:Create("ScreenGui", {
@@ -373,21 +373,8 @@ function Speed_Library:CreateWindow(Config)
     Size = ResponsiveSize,
     ZIndex = 0,
     Name = "DropShadowHolder",
-    -- [SMOOTH FIX] AnchorPoint dipindah ke tengah (0.5, 0.5) supaya window bisa
-    -- di-scale-in/out lewat UIScale di bawah TANPA kelihatan geser ke pojok kiri
-    -- atas (yang bakal kejadian kalau anchor tetap (0,0) pas Scale-nya ditween).
-    AnchorPoint = Vector2.new(0.5, 0.5),
-    Position = UDim2.new(0, SpeedHubXGui.AbsoluteSize.X // 2, 0, SpeedHubXGui.AbsoluteSize.Y // 2)
+    Position = UDim2.new(0, (SpeedHubXGui.AbsoluteSize.X // 2 - ResponsiveSize.X.Offset // 2), 0, (SpeedHubXGui.AbsoluteSize.Y // 2 - ResponsiveSize.Y.Offset // 2))
   }, SpeedHubXGui)
-
-  -- [SMOOTH FIX] UIScale dipakai buat animasi buka/tutup window (lihat AnimateWindowOpen/
-  -- AnimateWindowClose di bawah). Nge-scale lewat UIScale gak ganggu layout UDim2 persen
-  -- yang udah ada di semua child (beda dari nge-tween Size langsung, yang bisa bikin
-  -- konten dalemnya distorsi kalau ada elemen berbasis Offset).
-  local WindowUIScale = Custom:Create("UIScale", {
-    Scale = 1,
-    Name = "WindowUIScale"
-  }, DropShadowHolder)
 
   local DropShadow = Custom:Create("ImageLabel", {
     Image = "",
@@ -416,18 +403,6 @@ function Speed_Library:CreateWindow(Config)
   }, DropShadow)
 
   Custom:Create("UICorner", {}, Main)
-
-  -- [FITUR BARU] Layer buat gambar dekorasi (kayak ilustrasi anime transparan di
-  -- Napoleon). ClipsDescendants biar gambarnya kepotong rapi ngikutin rounded corner
-  -- window, ZIndex 0 + dibuat paling awal supaya render di BELAKANG semua UI lain
-  -- (search bar, tab, konten, dll tetap kebaca jelas di atasnya).
-  local ArtClipFrame = Custom:Create("Frame", {
-    BackgroundTransparency = 1,
-    ClipsDescendants = true,
-    Size = UDim2.new(1, 0, 1, 0),
-    ZIndex = 0,
-    Name = "ArtClipFrame"
-  }, Main)
 
   local MainStroke = Custom:Create("UIStroke", {
     Color = Custom.ColorRGB,
@@ -466,6 +441,52 @@ function Speed_Library:CreateWindow(Config)
     end)
   end
 
+  -- ==========================================
+  -- SMOOTH WINDOW OPEN/CLOSE (dipakai ulang tiap kali GUI dibuka/ditutup,
+  -- bukan cuma sekali pas load pertama). Sebelumnya minimize & tombol
+  -- buka/tutup langsung set "Visible" instan -> window "pop" tanpa animasi.
+  -- ==========================================
+  local WindowIsOpen = true
+  local WindowAnimBusy = false
+
+  local function AnimateWindowOpen()
+    if WindowIsOpen or WindowAnimBusy then return end
+    WindowAnimBusy = true
+    WindowIsOpen = true
+
+    DropShadowHolder.Visible = true
+    MainScale.Scale = 0.85
+    Main.BackgroundTransparency = 1
+
+    local scaleTween = TweenService:Create(MainScale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1})
+    local fadeTween  = TweenService:Create(Main, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0.15})
+
+    scaleTween:Play()
+    fadeTween:Play()
+    fadeTween.Completed:Connect(function()
+      WindowAnimBusy = false
+    end)
+  end
+
+  local function AnimateWindowClose()
+    if (not WindowIsOpen) or WindowAnimBusy then return end
+    WindowAnimBusy = true
+    WindowIsOpen = false
+
+    local scaleTween = TweenService:Create(MainScale, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = 0.85})
+    local fadeTween  = TweenService:Create(Main, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {BackgroundTransparency = 1})
+
+    scaleTween:Play()
+    fadeTween:Play()
+    fadeTween.Completed:Connect(function()
+      DropShadowHolder.Visible = false
+      -- reset biar siap dianimasikan lagi pas dibuka berikutnya
+      MainScale.Scale = 1
+      Main.BackgroundTransparency = 0.15
+      WindowAnimBusy = false
+    end)
+  end
+
   local Top = Custom:Create("Frame", {
     BackgroundColor3 = Color3.fromRGB(0, 0, 0),
     BackgroundTransparency = 0.999,
@@ -481,8 +502,7 @@ function Speed_Library:CreateWindow(Config)
   local InfoContainer = Custom:Create("Frame", {
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0),
-    Position = UDim2.new(1, -130, 0, 0), -- [FIX] Digeser lebih jauh dari pojok kanan (dulu -100),
-                                          -- biar gak ngumpul mepet ke tombol minimize/close.
+    Position = UDim2.new(1, -100, 0, 0), -- SUDAH DIGESER KE KIRI BIAR GAK MEPET KANAN
     Size = UDim2.new(0, 400, 1, 0), 
     Name = "InfoContainer",
     Parent = Top
@@ -497,102 +517,30 @@ function Speed_Library:CreateWindow(Config)
   })
 
   function Speed_Library:AddTopInfo(Text)
-    -- [PREMIUM STYLE] Sebelumnya pill kecil (22px), fill nyaris hitam polos (20,20,25),
-    -- border tipis 0.8px -> kesannya nempel/kurang "berbobot". Sekarang dibikin lebih
-    -- besar, ada gradient tipis pakai warna accent (Custom.ColorRGB), border lebih tebal
-    -- + sedikit glow, biar keliatan kayak badge premium bukan sekadar label abu-abu.
     local Pill = Custom:Create("Frame", {
-      BackgroundColor3 = Color3.fromRGB(24, 24, 30),
+      BackgroundColor3 = Color3.fromRGB(20, 20, 25), 
       BorderSizePixel = 0,
-      AutomaticSize = Enum.AutomaticSize.X,
-      Size = UDim2.new(0, 0, 0, 26),
+      AutomaticSize = Enum.AutomaticSize.X, 
+      Size = UDim2.new(0, 0, 0, 22),
       Parent = InfoContainer
     })
-
-    Custom:Create("UICorner", { CornerRadius = UDim.new(0, 8) }, Pill)
-
-    -- [FIX] UIStroke dihapus -- Napoleon gak pake border warna di pill-nya, cuma kotak
-    -- flat polos + gradient tipis doang.
-
-    local PillGradient = Custom:Create("UIGradient", {
-      Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Custom.ColorRGB),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(24, 24, 30))
-      }),
-      Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.82),
-        NumberSequenceKeypoint.new(1, 1)
-      }),
-      Rotation = 15
-    }, Pill)
-
-    Custom:Create("UIPadding", { PaddingLeft = UDim.new(0, 12), PaddingRight = UDim.new(0, 12), Parent = Pill })
+    
+    Custom:Create("UICorner", { CornerRadius = UDim.new(0, 4) }, Pill)
+    Custom:Create("UIStroke", { Color = Custom.ColorRGB, Thickness = 0.8 }, Pill)
+    Custom:Create("UIPadding", { PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8), Parent = Pill })
 
     local PillText = Custom:Create("TextLabel", {
       Font = Enum.Font.GothamBold,
       Text = Text,
-      TextColor3 = Color3.fromRGB(235, 235, 235),
-      TextSize = 12,
+      TextColor3 = Color3.fromRGB(220, 220, 220),
+      TextSize = 11,
       AutomaticSize = Enum.AutomaticSize.X,
       BackgroundTransparency = 1,
       Size = UDim2.new(0, 0, 1, 0),
       Parent = Pill
     })
 
-    -- [FIX] Efek hover sekarang nge-tween gradient transparency-nya (bukan stroke lagi),
-    -- biar tetep ada feedback halus pas di-hover tanpa perlu border.
-    if PremiumFX.HoverEffects then
-      local PillButton = Custom:Create("TextButton", {
-        Text = "", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Parent = Pill
-      })
-      PillButton.MouseEnter:Connect(function()
-        TweenService:Create(PillGradient, TweenInfo.new(0.15), {
-          Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.6),
-            NumberSequenceKeypoint.new(1, 0.9)
-          })
-        }):Play()
-      end)
-      PillButton.MouseLeave:Connect(function()
-        TweenService:Create(PillGradient, TweenInfo.new(0.15), {
-          Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.82),
-            NumberSequenceKeypoint.new(1, 1)
-          })
-        }):Play()
-      end)
-    end
-
     return PillText 
-  end
-
-  -- [FITUR BARU] Pasang gambar dekorasi transparan di background window, kayak
-  -- ilustrasi anime yang dipakai Napoleon. ImageId WAJIB punya lu sendiri (upload
-  -- ke Roblox lewat akun lu, terus pakai "rbxassetid://xxxxxxxx") -- Assistant AI
-  -- gak bisa nyediain/generate gambar karakternya, itu karya orang lain.
-  --
-  -- Config opsional:
-  --   Transparency (0-1, default 0.4)  -> makin gede makin transparan/samar
-  --   Size   (UDim2, default 280x280)
-  --   Position (UDim2, default di tengah window)
-  --   AnchorPoint (Vector2, default (0.5, 0.5) = tengah)
-  function Speed_Library:SetCharacterArt(ImageId, Config)
-    Config = Config or {}
-
-    local Art = Custom:Create("ImageLabel", {
-      Image = ImageId or "",
-      ImageTransparency = Config.Transparency or 0.4,
-      ScaleType = Enum.ScaleType.Fit,
-      BackgroundTransparency = 1,
-      AnchorPoint = Config.AnchorPoint or Vector2.new(0.5, 0.5),
-      Position = Config.Position or UDim2.new(0.5, 0, 0.78, 0),
-      Size = Config.Size or UDim2.new(0, 180, 0, 180),
-      ZIndex = 0,
-      Name = "CharacterArt",
-      Parent = ArtClipFrame
-    })
-
-    return Art
   end
 
   -- ==========================================
@@ -713,7 +661,7 @@ function Speed_Library:CreateWindow(Config)
     Parent = LayersTab
   })
   Custom:Create("UICorner", { CornerRadius = UDim.new(0, 4) }, SidebarSearch)
-  -- [FIX] UIStroke dihapus -- Napoleon gak pake border warna di search bar, cuma kotak flat polos.
+  Custom:Create("UIStroke", { Color = Custom.ColorRGB, Thickness = 0.5 }, SidebarSearch)
 
   local SearchInput = Custom:Create("TextBox", {
     Font = Enum.Font.Gotham,
@@ -729,13 +677,11 @@ function Speed_Library:CreateWindow(Config)
   })
 
   Custom:Create("ImageLabel", {
-    Image = "rbxassetid://10709761813", -- Lucide "aperture" icon (bukan kaca pembesar biasa)
+    Image = "rbxassetid://6031154871",
     BackgroundTransparency = 1,
     Size = UDim2.new(0, 14, 0, 14),
     Position = UDim2.new(0, 6, 0.5, -7),
-    ImageColor3 = Custom.ColorRGB,
-    ImageTransparency = 0.25,
-    Name = "SearchIcon",
+    ImageColor3 = Color3.fromRGB(150, 150, 150),
     Parent = SidebarSearch
   })
 
@@ -803,24 +749,6 @@ function Speed_Library:CreateWindow(Config)
     EasingStyle = Enum.EasingStyle.Quad
   }, LayersFolder)
 
-  -- [SMOOTH FIX] JumpToIndex() switches page INSTANTLY, ignoring TweenTime/EasingStyle
-  -- set above entirely. Next()/Previous() are the only methods that actually animate,
-  -- so we step toward the target index using those instead -> tab switch now slides
-  -- smoothly like the config above always intended.
-  local function AnimatedGoToTab(TargetIndex)
-    local CurrentIndex = LayersPageLayout.CurrentPage.LayoutOrder
-    if TargetIndex == CurrentIndex then return end
-    if TargetIndex > CurrentIndex then
-      for _ = CurrentIndex, TargetIndex - 1 do
-        LayersPageLayout:Next()
-      end
-    else
-      for _ = CurrentIndex, TargetIndex + 1, -1 do
-        LayersPageLayout:Previous()
-      end
-    end
-  end
-
   local ScrollTab = Custom:Create("ScrollingFrame", {
     CanvasSize = UDim2.new(0, 0, 2.10000002, 0),
     ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0),
@@ -836,7 +764,7 @@ function Speed_Library:CreateWindow(Config)
   }, LayersTab)
 
   Custom:Create("UIListLayout", {
-    Padding = UDim.new(0, 4),
+    Padding = UDim.new(0, 0),
     SortOrder = Enum.SortOrder.LayoutOrder
   }, ScrollTab)
 
@@ -845,7 +773,7 @@ function Speed_Library:CreateWindow(Config)
 
     for _, v in pairs(ScrollTab:GetChildren()) do
       if v.Name ~= "UIListLayout" then
-        _Total = _Total + 4 + v.Size.Y.Offset
+        _Total = _Total + 3 + v.Size.Y.Offset
       end
     end
 
@@ -889,20 +817,9 @@ function Speed_Library:CreateWindow(Config)
     Thickness = 1.2
   }, ProfileAvatar)
 
-  -- [PRIVASI] Nama akun disensor sebagian di tampilan (misal "wkw_650" jadi "****650"),
-  -- biar gak keliatan penuh kalau di-screenshot/stream. Cuma buat tampilan doang, gak
-  -- ngubah nama akun aslinya di Roblox.
-  local function MaskUsername(Name)
-    local VisibleChars = 3 -- jumlah karakter TERAKHIR yang tetap kelihatan
-    if #Name <= VisibleChars then
-      return Name -- nama pendek, gak usah disensor biar gak jadi bintang doang
-    end
-    return string.rep("*", #Name - VisibleChars) .. string.sub(Name, -VisibleChars)
-  end
-
   Custom:Create("TextLabel", {
     Font = Enum.Font.GothamBold,
-    Text = MaskUsername(Player.Name),
+    Text = Player.Name,
     TextColor3 = Color3.fromRGB(230, 230, 230),
     TextSize = 12,
     TextXAlignment = Enum.TextXAlignment.Left,
@@ -924,33 +841,13 @@ function Speed_Library:CreateWindow(Config)
     end
   end)
 
-  -- [SMOOTH FIX] Sebelumnya minimize/reopen cuma set .Visible langsung -> window
-  -- ilang/muncul dalam 1 frame, kesannya patah. Sekarang di-scale kecil + fade dulu
-  -- lewat WindowUIScale & DropShadow (dibuat di atas), baru Visible di-toggle setelah
-  -- animasinya kelar.
-  local function AnimateWindowClose()
-    TweenService:Create(WindowUIScale, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = 0.85}):Play()
-    TweenService:Create(DropShadow, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {ImageTransparency = 1}):Play()
-    task.delay(0.22, function()
-      DropShadowHolder.Visible = false
-    end)
-  end
-
-  local function AnimateWindowOpen()
-    DropShadowHolder.Visible = true
-    WindowUIScale.Scale = 0.85
-    DropShadow.ImageTransparency = 1
-    TweenService:Create(WindowUIScale, TweenInfo.new(0.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
-    TweenService:Create(DropShadow, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageTransparency = 0.5}):Play()
-  end
-
   MinButton.Activated:Connect(function()
     CircleClick(Min, Player:GetMouse().X, Player:GetMouse().Y)
     AnimateWindowClose()
   end)
 
   Open_Close.Activated:Connect(function()
-    if DropShadowHolder.Visible then
+    if WindowIsOpen then
       AnimateWindowClose()
     else
       AnimateWindowOpen()
@@ -1181,27 +1078,16 @@ function Speed_Library:CreateWindow(Config)
   local function CreateFieldBase(Parent, LayoutOrder, Title, Content, RightPad)
     RightPad = RightPad or 100
 
-    -- [CARD STYLE] Sebelumnya BackgroundTransparency 0.935 (~6.5% opacity) bikin
-    -- tiap item nyaris gak keliatan card-nya, nempel rata sama background section
-    -- -> kesannya "flat"/kosong. Dinaikin ke 0.88 (~12% opacity) + corner radius
-    -- lebih besar + tambah UIStroke tipis biar tiap item keliatan "berdiri sendiri"
-    -- sebagai kotak sendiri, mirip referensi Napoleon.
     local Base = Custom:Create("Frame", {
       BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-      BackgroundTransparency = 0.88,
+      BackgroundTransparency = 0.935,
       BorderSizePixel = 0,
       LayoutOrder = LayoutOrder,
       Size = UDim2.new(1, 0, 0, 35),
       Name = "Field"
     }, Parent)
 
-    Custom:Create("UICorner", {CornerRadius = UDim.new(0, 7)}, Base)
-
-    Custom:Create("UIStroke", {
-      Color = Color3.fromRGB(255, 255, 255),
-      Thickness = 1,
-      Transparency = 0.92
-    }, Base)
+    Custom:Create("UICorner", {CornerRadius = UDim.new(0, 4)}, Base)
 
     local TitleLabel = Custom:Create("TextLabel", {
       Font = Enum.Font.GothamBold,
@@ -1287,7 +1173,7 @@ function Speed_Library:CreateWindow(Config)
     })
 
     Custom:Create("UICorner", {
-      CornerRadius = UDim.new(0, 7),
+      CornerRadius = UDim.new(0, 4),
       Parent = Tab
     })
 
@@ -1393,7 +1279,7 @@ function Speed_Library:CreateWindow(Config)
         _TabT:Play()
         _FTween:Play()
 
-        AnimatedGoToTab(Tab.LayoutOrder)
+        LayersPageLayout:JumpToIndex(Tab.LayoutOrder)
 
         task.wait(0.05)
         NameTab.Text = _Name
@@ -1528,7 +1414,7 @@ function Speed_Library:CreateWindow(Config)
       }, SectionAdd)
 
       Custom:Create("UIListLayout", {
-        Padding = UDim.new(0, 6),
+        Padding = UDim.new(0, 3),
         SortOrder = Enum.SortOrder.LayoutOrder
       }, SectionAdd)
 
@@ -1559,14 +1445,14 @@ function Speed_Library:CreateWindow(Config)
 
           for _, v in pairs(SectionAdd:GetChildren()) do
             if v.Name ~= "UIListLayout" and v.Name ~= "UICorner" then
-              SectionSizeYWitdh = SectionSizeYWitdh + v.Size.Y.Offset + 6
+              SectionSizeYWitdh = SectionSizeYWitdh + v.Size.Y.Offset + 3
             end
           end
 
-          TweenService:Create(FeatureFrame, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = 90}):Play()
-          TweenService:Create(Section, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, 1, 0, SectionSizeYWitdh)}):Play()
-          TweenService:Create(SectionAdd, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 0, SectionSizeYWitdh - 38)}):Play()
-          TweenService:Create(SectionDecideFrame, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 0, 2)}):Play()
+          TweenService:Create(FeatureFrame, TweenInfo.new(0.1), {Rotation = 90}):Play()
+          TweenService:Create(Section, TweenInfo.new(0.1), {Size = UDim2.new(1, 1, 0, SectionSizeYWitdh)}):Play()
+          TweenService:Create(SectionAdd, TweenInfo.new(0.1), {Size = UDim2.new(1, 0, 0, SectionSizeYWitdh - 38)}):Play()
+          TweenService:Create(SectionDecideFrame, TweenInfo.new(0.1), {Size = UDim2.new(1, 0, 0, 2)}):Play()
 
           task.wait(0.5)
           UpdateSizeScroll()
@@ -1581,12 +1467,12 @@ function Speed_Library:CreateWindow(Config)
         CircleClick(SectionButton, Player:GetMouse().X, Player:GetMouse().Y)
 
         if OpenSection then
-          TweenService:Create(FeatureFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Rotation = 0}):Play()
-          TweenService:Create(Section, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(1, 1, 0, 30)}):Play()
-          TweenService:Create(SectionDecideFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 2)}):Play()
+          TweenService:Create(FeatureFrame, TweenInfo.new(0.1), {Rotation = 0}):Play()
+          TweenService:Create(Section, TweenInfo.new(0.1), {Size = UDim2.new(1, 1, 0, 30)}):Play()
+          TweenService:Create(SectionDecideFrame, TweenInfo.new(0.1), {Size = UDim2.new(0, 0, 0, 2)}):Play()
 
           OpenSection = false
-          task.wait(0.2)
+          task.wait(0.1)
           UpdateSizeScroll()
         else
           OpenSection = true
@@ -1750,10 +1636,10 @@ function Speed_Library:CreateWindow(Config)
 
         if PremiumFX.HoverEffects then
           ButtonButton.MouseEnter:Connect(function()
-            TweenService:Create(Button, TweenInfo.new(0.15), {BackgroundTransparency = 0.78}):Play()
+            TweenService:Create(Button, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
           end)
           ButtonButton.MouseLeave:Connect(function()
-            TweenService:Create(Button, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
+            TweenService:Create(Button, TweenInfo.new(0.15), {BackgroundTransparency = 0.935}):Play()
           end)
         end
 
@@ -1825,10 +1711,10 @@ function Speed_Library:CreateWindow(Config)
 
         if PremiumFX.HoverEffects then
           ToggleButton.MouseEnter:Connect(function()
-            TweenService:Create(Toggle, TweenInfo.new(0.15), {BackgroundTransparency = 0.78}):Play()
+            TweenService:Create(Toggle, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
           end)
           ToggleButton.MouseLeave:Connect(function()
-            TweenService:Create(Toggle, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
+            TweenService:Create(Toggle, TweenInfo.new(0.15), {BackgroundTransparency = 0.935}):Play()
           end)
         end
 
@@ -1951,10 +1837,10 @@ function Speed_Library:CreateWindow(Config)
 
         if PremiumFX.HoverEffects then
           Slider.MouseEnter:Connect(function()
-            TweenService:Create(Slider, TweenInfo.new(0.15), {BackgroundTransparency = 0.78}):Play()
+            TweenService:Create(Slider, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
           end)
           Slider.MouseLeave:Connect(function()
-            TweenService:Create(Slider, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
+            TweenService:Create(Slider, TweenInfo.new(0.15), {BackgroundTransparency = 0.935}):Play()
           end)
         end
 
@@ -2077,10 +1963,10 @@ function Speed_Library:CreateWindow(Config)
 
         if PremiumFX.HoverEffects then
           InputTextBox.MouseEnter:Connect(function()
-            TweenService:Create(Input, TweenInfo.new(0.15), {BackgroundTransparency = 0.78}):Play()
+            TweenService:Create(Input, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
           end)
           InputTextBox.MouseLeave:Connect(function()
-            TweenService:Create(Input, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
+            TweenService:Create(Input, TweenInfo.new(0.15), {BackgroundTransparency = 0.935}):Play()
           end)
         end
 
@@ -2146,10 +2032,10 @@ function Speed_Library:CreateWindow(Config)
 
         if PremiumFX.HoverEffects then
           DropdownButton.MouseEnter:Connect(function()
-            TweenService:Create(Dropdown, TweenInfo.new(0.15), {BackgroundTransparency = 0.78}):Play()
+            TweenService:Create(Dropdown, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
           end)
           DropdownButton.MouseLeave:Connect(function()
-            TweenService:Create(Dropdown, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
+            TweenService:Create(Dropdown, TweenInfo.new(0.15), {BackgroundTransparency = 0.935}):Play()
           end)
         end
 
@@ -2269,7 +2155,7 @@ function Speed_Library:CreateWindow(Config)
               local tweenInfoInOut = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
 
               local Size = isTextFound and UDim2.new(0, 1, 0, 12) or UDim2.new(0, 0, 0, 0)
-              local BackgroundTransparency = isTextFound and 0.88 or 0.999
+              local BackgroundTransparency = isTextFound and 0.935 or 0.999
               local Transparency = isTextFound and 0 or 0.999
 
               TweenService:Create(Drop.ChooseFrame, tweenInfoInOut, {Size = Size}):Play()
@@ -2445,10 +2331,10 @@ function Speed_Library:CreateWindow(Config)
 
         if PremiumFX.HoverEffects then
           BindButton.MouseEnter:Connect(function()
-            TweenService:Create(Bind, TweenInfo.new(0.15), {BackgroundTransparency = 0.78}):Play()
+            TweenService:Create(Bind, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
           end)
           BindButton.MouseLeave:Connect(function()
-            TweenService:Create(Bind, TweenInfo.new(0.15), {BackgroundTransparency = 0.88}):Play()
+            TweenService:Create(Bind, TweenInfo.new(0.15), {BackgroundTransparency = 0.935}):Play()
           end)
         end
 
