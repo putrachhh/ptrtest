@@ -511,13 +511,10 @@ function Speed_Library:CreateWindow(Config)
 
     Custom:Create("UICorner", { CornerRadius = UDim.new(0, 8) }, Pill)
 
-    local PillStroke = Custom:Create("UIStroke", {
-      Color = Custom.ColorRGB,
-      Thickness = 1.1,
-      Transparency = 0.25
-    }, Pill)
+    -- [FIX] UIStroke dihapus -- Napoleon gak pake border warna di pill-nya, cuma kotak
+    -- flat polos + gradient tipis doang.
 
-    Custom:Create("UIGradient", {
+    local PillGradient = Custom:Create("UIGradient", {
       Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Custom.ColorRGB),
         ColorSequenceKeypoint.new(1, Color3.fromRGB(24, 24, 30))
@@ -542,16 +539,27 @@ function Speed_Library:CreateWindow(Config)
       Parent = Pill
     })
 
-    -- Efek hover halus, biar konsisten sama item lain yang udah di-smooth-in sebelumnya.
+    -- [FIX] Efek hover sekarang nge-tween gradient transparency-nya (bukan stroke lagi),
+    -- biar tetep ada feedback halus pas di-hover tanpa perlu border.
     if PremiumFX.HoverEffects then
       local PillButton = Custom:Create("TextButton", {
         Text = "", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Parent = Pill
       })
       PillButton.MouseEnter:Connect(function()
-        TweenService:Create(PillStroke, TweenInfo.new(0.15), {Transparency = 0}):Play()
+        TweenService:Create(PillGradient, TweenInfo.new(0.15), {
+          Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.6),
+            NumberSequenceKeypoint.new(1, 0.9)
+          })
+        }):Play()
       end)
       PillButton.MouseLeave:Connect(function()
-        TweenService:Create(PillStroke, TweenInfo.new(0.15), {Transparency = 0.25}):Play()
+        TweenService:Create(PillGradient, TweenInfo.new(0.15), {
+          Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.82),
+            NumberSequenceKeypoint.new(1, 1)
+          })
+        }):Play()
       end)
     end
 
@@ -705,7 +713,7 @@ function Speed_Library:CreateWindow(Config)
     Parent = LayersTab
   })
   Custom:Create("UICorner", { CornerRadius = UDim.new(0, 4) }, SidebarSearch)
-  Custom:Create("UIStroke", { Color = Custom.ColorRGB, Thickness = 0.5 }, SidebarSearch)
+  -- [FIX] UIStroke dihapus -- Napoleon gak pake border warna di search bar, cuma kotak flat polos.
 
   local SearchInput = Custom:Create("TextBox", {
     Font = Enum.Font.Gotham,
