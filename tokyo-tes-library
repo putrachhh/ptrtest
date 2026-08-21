@@ -721,7 +721,7 @@ function Speed_Library:CreateWindow(Config)
   })
 
   Custom:Create("ImageLabel", {
-    Image = "rbxassetid://6031154871",
+    Image = "rbxassetid://10709761813", -- Lucide "aperture" icon (bukan kaca pembesar biasa)
     BackgroundTransparency = 1,
     Size = UDim2.new(0, 14, 0, 14),
     Position = UDim2.new(0, 6, 0.5, -7),
