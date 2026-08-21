@@ -577,8 +577,8 @@ function Speed_Library:CreateWindow(Config)
       ScaleType = Enum.ScaleType.Fit,
       BackgroundTransparency = 1,
       AnchorPoint = Config.AnchorPoint or Vector2.new(0.5, 0.5),
-      Position = Config.Position or UDim2.new(0.5, 0, 0.68, 0),
-      Size = Config.Size or UDim2.new(0, 230, 0, 230),
+      Position = Config.Position or UDim2.new(0.5, 0, 0.78, 0),
+      Size = Config.Size or UDim2.new(0, 180, 0, 180),
       ZIndex = 0,
       Name = "CharacterArt",
       Parent = ArtClipFrame
