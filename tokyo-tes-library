@@ -566,8 +566,8 @@ function Speed_Library:CreateWindow(Config)
   -- Config opsional:
   --   Transparency (0-1, default 0.4)  -> makin gede makin transparan/samar
   --   Size   (UDim2, default 280x280)
-  --   Position (UDim2, default nempel pojok kanan bawah window)
-  --   AnchorPoint (Vector2, default (1,1) = pojok kanan bawah)
+  --   Position (UDim2, default di tengah window)
+  --   AnchorPoint (Vector2, default (0.5, 0.5) = tengah)
   function Speed_Library:SetCharacterArt(ImageId, Config)
     Config = Config or {}
 
@@ -576,8 +576,8 @@ function Speed_Library:CreateWindow(Config)
       ImageTransparency = Config.Transparency or 0.4,
       ScaleType = Enum.ScaleType.Fit,
       BackgroundTransparency = 1,
-      AnchorPoint = Config.AnchorPoint or Vector2.new(1, 1),
-      Position = Config.Position or UDim2.new(1, 20, 1, 20),
+      AnchorPoint = Config.AnchorPoint or Vector2.new(0.5, 0.5),
+      Position = Config.Position or UDim2.new(0.5, 0, 0.5, 0),
       Size = Config.Size or UDim2.new(0, 280, 0, 280),
       ZIndex = 0,
       Name = "CharacterArt",
