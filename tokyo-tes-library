@@ -373,17 +373,10 @@ function Speed_Library:CreateWindow(Config)
     Size = ResponsiveSize,
     ZIndex = 0,
     Name = "DropShadowHolder",
-    -- [SMOOTH FIX] AnchorPoint dipindah ke tengah (0.5, 0.5) supaya window bisa
-    -- di-scale-in/out lewat UIScale di bawah TANPA kelihatan geser ke pojok kiri
-    -- atas (yang bakal kejadian kalau anchor tetap (0,0) pas Scale-nya ditween).
     AnchorPoint = Vector2.new(0.5, 0.5),
     Position = UDim2.new(0, SpeedHubXGui.AbsoluteSize.X // 2, 0, SpeedHubXGui.AbsoluteSize.Y // 2)
   }, SpeedHubXGui)
 
-  -- [SMOOTH FIX] UIScale dipakai buat animasi buka/tutup window (lihat AnimateWindowOpen/
-  -- AnimateWindowClose di bawah). Nge-scale lewat UIScale gak ganggu layout UDim2 persen
-  -- yang udah ada di semua child (beda dari nge-tween Size langsung, yang bisa bikin
-  -- konten dalemnya distorsi kalau ada elemen berbasis Offset).
   local WindowUIScale = Custom:Create("UIScale", {
     Scale = 1,
     Name = "WindowUIScale"
@@ -417,10 +410,6 @@ function Speed_Library:CreateWindow(Config)
 
   Custom:Create("UICorner", {}, Main)
 
-  -- [FITUR BARU] Layer buat gambar dekorasi (kayak ilustrasi anime transparan di
-  -- Napoleon). ClipsDescendants biar gambarnya kepotong rapi ngikutin rounded corner
-  -- window, ZIndex 0 + dibuat paling awal supaya render di BELAKANG semua UI lain
-  -- (search bar, tab, konten, dll tetap kebaca jelas di atasnya).
   local ArtClipFrame = Custom:Create("Frame", {
     BackgroundTransparency = 1,
     ClipsDescendants = true,
@@ -476,13 +465,12 @@ function Speed_Library:CreateWindow(Config)
   }, Main)
 
   -- ==========================================
-  -- TOP BAR INFO CONTAINER (FIXED POSISI LEBIH KE KIRI)
+  -- TOP BAR INFO CONTAINER
   -- ==========================================
   local InfoContainer = Custom:Create("Frame", {
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0),
-    Position = UDim2.new(1, -130, 0, 0), -- [FIX] Digeser lebih jauh dari pojok kanan (dulu -100),
-                                          -- biar gak ngumpul mepet ke tombol minimize/close.
+    Position = UDim2.new(1, -130, 0, 0),
     Size = UDim2.new(0, 400, 1, 0), 
     Name = "InfoContainer",
     Parent = Top
@@ -497,10 +485,6 @@ function Speed_Library:CreateWindow(Config)
   })
 
   function Speed_Library:AddTopInfo(Text)
-    -- [PREMIUM STYLE] Sebelumnya pill kecil (22px), fill nyaris hitam polos (20,20,25),
-    -- border tipis 0.8px -> kesannya nempel/kurang "berbobot". Sekarang dibikin lebih
-    -- besar, ada gradient tipis pakai warna accent (Custom.ColorRGB), border lebih tebal
-    -- + sedikit glow, biar keliatan kayak badge premium bukan sekadar label abu-abu.
     local Pill = Custom:Create("Frame", {
       BackgroundColor3 = Color3.fromRGB(24, 24, 30),
       BorderSizePixel = 0,
@@ -511,17 +495,20 @@ function Speed_Library:CreateWindow(Config)
 
     Custom:Create("UICorner", { CornerRadius = UDim.new(0, 8) }, Pill)
 
-    -- [FIX] UIStroke dihapus -- Napoleon gak pake border warna di pill-nya, cuma kotak
-    -- flat polos + gradient tipis doang.
+    local PillStroke = Custom:Create("UIStroke", {
+      Color = Custom.ColorRGB,
+      Thickness = 1.1,
+      Transparency = 0.25
+    }, Pill)
 
-    local PillGradient = Custom:Create("UIGradient", {
+    Custom:Create("UIGradient", {
       Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Custom.ColorRGB),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(24, 24, 30))
+        ColorSequenceKeypoint.new(1, Custom.ColorRGB) 
       }),
       Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.82),
-        NumberSequenceKeypoint.new(1, 1)
+        NumberSequenceKeypoint.new(0, 0), 
+        NumberSequenceKeypoint.new(1, 0)
       }),
       Rotation = 15
     }, Pill)
@@ -539,43 +526,21 @@ function Speed_Library:CreateWindow(Config)
       Parent = Pill
     })
 
-    -- [FIX] Efek hover sekarang nge-tween gradient transparency-nya (bukan stroke lagi),
-    -- biar tetep ada feedback halus pas di-hover tanpa perlu border.
     if PremiumFX.HoverEffects then
       local PillButton = Custom:Create("TextButton", {
         Text = "", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Parent = Pill
       })
       PillButton.MouseEnter:Connect(function()
-        TweenService:Create(PillGradient, TweenInfo.new(0.15), {
-          Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.6),
-            NumberSequenceKeypoint.new(1, 0.9)
-          })
-        }):Play()
+        TweenService:Create(PillStroke, TweenInfo.new(0.15), {Transparency = 0}):Play()
       end)
       PillButton.MouseLeave:Connect(function()
-        TweenService:Create(PillGradient, TweenInfo.new(0.15), {
-          Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.82),
-            NumberSequenceKeypoint.new(1, 1)
-          })
-        }):Play()
+        TweenService:Create(PillStroke, TweenInfo.new(0.15), {Transparency = 0.25}):Play()
       end)
     end
 
     return PillText 
   end
 
-  -- [FITUR BARU] Pasang gambar dekorasi transparan di background window, kayak
-  -- ilustrasi anime yang dipakai Napoleon. ImageId WAJIB punya lu sendiri (upload
-  -- ke Roblox lewat akun lu, terus pakai "rbxassetid://xxxxxxxx") -- Assistant AI
-  -- gak bisa nyediain/generate gambar karakternya, itu karya orang lain.
-  --
-  -- Config opsional:
-  --   Transparency (0-1, default 0.4)  -> makin gede makin transparan/samar
-  --   Size   (UDim2, default 280x280)
-  --   Position (UDim2, default di tengah window)
-  --   AnchorPoint (Vector2, default (0.5, 0.5) = tengah)
   function Speed_Library:SetCharacterArt(ImageId, Config)
     Config = Config or {}
 
@@ -596,7 +561,7 @@ function Speed_Library:CreateWindow(Config)
   end
 
   -- ==========================================
-  -- AUTO-LAYOUT JUDUL (TANPA TITIK PUTIH)
+  -- AUTO-LAYOUT JUDUL
   -- ==========================================
   local TopTitleContainer = Custom:Create("Frame", {
     BackgroundTransparency = 1,
@@ -610,7 +575,7 @@ function Speed_Library:CreateWindow(Config)
     FillDirection = Enum.FillDirection.Horizontal,
     HorizontalAlignment = Enum.HorizontalAlignment.Left,
     VerticalAlignment = Enum.VerticalAlignment.Center,
-    Padding = UDim.new(0, 10), -- JARAK ANTARA TOKYO HUB DAN NAMA GAME
+    Padding = UDim.new(0, 10),
     Parent = TopTitleContainer
   })
 
@@ -638,8 +603,6 @@ function Speed_Library:CreateWindow(Config)
   })
 
   if Description ~= "" then
-    -- TITIK PUTIH (TITLE SEPARATOR) SUDAH DIHAPUS SEPENUHNYA
-
     Custom:Create("TextLabel", {
       FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
       Text = Description,
@@ -706,14 +669,15 @@ function Speed_Library:CreateWindow(Config)
   -- SEARCH BAR SIDEBAR
   -- ==========================================
   local SidebarSearch = Custom:Create("Frame", {
-    BackgroundColor3 = Color3.fromRGB(20, 20, 25),
+    BackgroundColor3 = Color3.fromRGB(255, 255, 255), 
+    BackgroundTransparency = 0.95, 
     BorderSizePixel = 0,
     Size = UDim2.new(1, -10, 0, 26),
     Position = UDim2.new(0, 5, 0, 5),
     Parent = LayersTab
   })
   Custom:Create("UICorner", { CornerRadius = UDim.new(0, 4) }, SidebarSearch)
-  -- [FIX] UIStroke dihapus -- Napoleon gak pake border warna di search bar, cuma kotak flat polos.
+  Custom:Create("UIStroke", { Color = Custom.ColorRGB, Thickness = 0.5 }, SidebarSearch)
 
   local SearchInput = Custom:Create("TextBox", {
     Font = Enum.Font.Gotham,
@@ -729,7 +693,7 @@ function Speed_Library:CreateWindow(Config)
   })
 
   Custom:Create("ImageLabel", {
-    Image = "rbxassetid://10709761813", -- Lucide "aperture" icon (bukan kaca pembesar biasa)
+    Image = "rbxassetid://10709761813",
     BackgroundTransparency = 1,
     Size = UDim2.new(0, 14, 0, 14),
     Position = UDim2.new(0, 6, 0.5, -7),
@@ -803,10 +767,6 @@ function Speed_Library:CreateWindow(Config)
     EasingStyle = Enum.EasingStyle.Quad
   }, LayersFolder)
 
-  -- [SMOOTH FIX] JumpToIndex() switches page INSTANTLY, ignoring TweenTime/EasingStyle
-  -- set above entirely. Next()/Previous() are the only methods that actually animate,
-  -- so we step toward the target index using those instead -> tab switch now slides
-  -- smoothly like the config above always intended.
   local function AnimatedGoToTab(TargetIndex)
     local CurrentIndex = LayersPageLayout.CurrentPage.LayoutOrder
     if TargetIndex == CurrentIndex then return end
@@ -889,13 +849,10 @@ function Speed_Library:CreateWindow(Config)
     Thickness = 1.2
   }, ProfileAvatar)
 
-  -- [PRIVASI] Nama akun disensor sebagian di tampilan (misal "wkw_650" jadi "****650"),
-  -- biar gak keliatan penuh kalau di-screenshot/stream. Cuma buat tampilan doang, gak
-  -- ngubah nama akun aslinya di Roblox.
   local function MaskUsername(Name)
-    local VisibleChars = 3 -- jumlah karakter TERAKHIR yang tetap kelihatan
+    local VisibleChars = 3
     if #Name <= VisibleChars then
-      return Name -- nama pendek, gak usah disensor biar gak jadi bintang doang
+      return Name
     end
     return string.rep("*", #Name - VisibleChars) .. string.sub(Name, -VisibleChars)
   end
@@ -924,10 +881,6 @@ function Speed_Library:CreateWindow(Config)
     end
   end)
 
-  -- [SMOOTH FIX] Sebelumnya minimize/reopen cuma set .Visible langsung -> window
-  -- ilang/muncul dalam 1 frame, kesannya patah. Sekarang di-scale kecil + fade dulu
-  -- lewat WindowUIScale & DropShadow (dibuat di atas), baru Visible di-toggle setelah
-  -- animasinya kelar.
   local function AnimateWindowClose()
     TweenService:Create(WindowUIScale, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = 0.85}):Play()
     TweenService:Create(DropShadow, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {ImageTransparency = 1}):Play()
@@ -1181,11 +1134,6 @@ function Speed_Library:CreateWindow(Config)
   local function CreateFieldBase(Parent, LayoutOrder, Title, Content, RightPad)
     RightPad = RightPad or 100
 
-    -- [CARD STYLE] Sebelumnya BackgroundTransparency 0.935 (~6.5% opacity) bikin
-    -- tiap item nyaris gak keliatan card-nya, nempel rata sama background section
-    -- -> kesannya "flat"/kosong. Dinaikin ke 0.88 (~12% opacity) + corner radius
-    -- lebih besar + tambah UIStroke tipis biar tiap item keliatan "berdiri sendiri"
-    -- sebagai kotak sendiri, mirip referensi Napoleon.
     local Base = Custom:Create("Frame", {
       BackgroundColor3 = Color3.fromRGB(255, 255, 255),
       BackgroundTransparency = 0.88,
