@@ -357,7 +357,7 @@ function Speed_Library:CreateWindow(Config)
   local Title = Config[1] or Config.Title or ""
   local Description = Config[2] or Config.Description or ""
   local TabWidth = Config[3] or Config["Tab Width"] or 120
-  local SizeUi = Config[4] or Config.SizeUi or UDim2.fromOffset(650, 400)
+  local SizeUi = Config[4] or Config.SizeUi or UDim2.fromOffset(560, 340)
   local Icon = Config[5] or Config.Icon or ""
 
   local SpeedHubXGui = Custom:Create("ScreenGui", {
@@ -578,7 +578,7 @@ function Speed_Library:CreateWindow(Config)
       BackgroundTransparency = 1,
       AnchorPoint = Config.AnchorPoint or Vector2.new(0.5, 0.5),
       Position = Config.Position or UDim2.new(0.5, 0, 0.68, 0),
-      Size = Config.Size or UDim2.new(0, 400, 0, 370),
+      Size = Config.Size or UDim2.new(0, 230, 0, 230),
       ZIndex = 0,
       Name = "CharacterArt",
       Parent = ArtClipFrame
@@ -879,9 +879,20 @@ function Speed_Library:CreateWindow(Config)
     Thickness = 1.2
   }, ProfileAvatar)
 
+  -- [PRIVASI] Nama akun disensor sebagian di tampilan (misal "wkw_650" jadi "****650"),
+  -- biar gak keliatan penuh kalau di-screenshot/stream. Cuma buat tampilan doang, gak
+  -- ngubah nama akun aslinya di Roblox.
+  local function MaskUsername(Name)
+    local VisibleChars = 3 -- jumlah karakter TERAKHIR yang tetap kelihatan
+    if #Name <= VisibleChars then
+      return Name -- nama pendek, gak usah disensor biar gak jadi bintang doang
+    end
+    return string.rep("*", #Name - VisibleChars) .. string.sub(Name, -VisibleChars)
+  end
+
   Custom:Create("TextLabel", {
     Font = Enum.Font.GothamBold,
-    Text = Player.Name,
+    Text = MaskUsername(Player.Name),
     TextColor3 = Color3.fromRGB(230, 230, 230),
     TextSize = 12,
     TextXAlignment = Enum.TextXAlignment.Left,
