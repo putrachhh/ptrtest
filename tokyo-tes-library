@@ -357,7 +357,7 @@ function Speed_Library:CreateWindow(Config)
   local Title = Config[1] or Config.Title or ""
   local Description = Config[2] or Config.Description or ""
   local TabWidth = Config[3] or Config["Tab Width"] or 120
-  local SizeUi = Config[4] or Config.SizeUi or UDim2.fromOffset(560, 340)
+  local SizeUi = Config[4] or Config.SizeUi or UDim2.fromOffset(630, 390)
   local Icon = Config[5] or Config.Icon or ""
 
   local SpeedHubXGui = Custom:Create("ScreenGui", {
