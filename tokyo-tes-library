@@ -487,7 +487,7 @@ function Speed_Library:CreateWindow(Config)
   function Speed_Library:AddTopInfo(Text)
     local Pill = Custom:Create("Frame", {
       BackgroundColor3 = Custom.ColorRGB,
-      BackgroundTransparency = 0,
+      BackgroundTransparency = 0.85, -- [GANTI DI SINI] Ubah jadi 0.85 biar warnanya transparan/menyatu
       BorderSizePixel = 0,
       AutomaticSize = Enum.AutomaticSize.X,
       Size = UDim2.new(0, 0, 0, 26),
@@ -496,6 +496,13 @@ function Speed_Library:CreateWindow(Config)
 
     Custom:Create("UICorner", { CornerRadius = UDim.new(0, 8) }, Pill)
     Custom:Create("UIPadding", { PaddingLeft = UDim.new(0, 12), PaddingRight = UDim.new(0, 12), Parent = Pill })
+
+    -- Biar lebih manis, kita kasih garis pinggir tipis (opsional, kalau gak suka bisa dihapus)
+    local PillStroke = Custom:Create("UIStroke", {
+      Color = Custom.ColorRGB,
+      Thickness = 1,
+      Transparency = 0.3
+    }, Pill)
 
     local PillText = Custom:Create("TextLabel", {
       Font = Enum.Font.GothamBold,
@@ -513,10 +520,12 @@ function Speed_Library:CreateWindow(Config)
         Text = "", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Parent = Pill
       })
       PillButton.MouseEnter:Connect(function()
-        TweenService:Create(Pill, TweenInfo.new(0.15), {BackgroundTransparency = 0.2}):Play()
+        -- Saat disorot mouse, warnanya jadi sedikit lebih tebal (0.5)
+        TweenService:Create(Pill, TweenInfo.new(0.15), {BackgroundTransparency = 0.5}):Play()
       end)
       PillButton.MouseLeave:Connect(function()
-        TweenService:Create(Pill, TweenInfo.new(0.15), {BackgroundTransparency = 0}):Play()
+        -- Saat mouse pergi, kembali transparan (0.85)
+        TweenService:Create(Pill, TweenInfo.new(0.15), {BackgroundTransparency = 0.85}):Play()
       end)
     end
 
