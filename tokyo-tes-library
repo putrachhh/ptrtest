@@ -6,7 +6,7 @@ local UserInputService = game:GetService("UserInputService")
 local VirtualUser = game:GetService("VirtualUser")
 
 local Custom = {} do
-  Custom.ColorRGB = Color3.fromRGB(190, 20, 130)
+  Custom.ColorRGB = Color3.fromRGB(222, 9, 231)
   function Custom:Create(Name, Properties, Parent)
     local _instance = Instance.new(Name)
 
@@ -577,8 +577,8 @@ function Speed_Library:CreateWindow(Config)
       ScaleType = Enum.ScaleType.Fit,
       BackgroundTransparency = 1,
       AnchorPoint = Config.AnchorPoint or Vector2.new(0.5, 0.5),
-      Position = Config.Position or UDim2.new(0.5, 0, 0.5, 0),
-      Size = Config.Size or UDim2.new(0, 280, 0, 280),
+      Position = Config.Position or UDim2.new(0.5, 0, 0.68, 0),
+      Size = Config.Size or UDim2.new(0, 420, 0, 420),
       ZIndex = 0,
       Name = "CharacterArt",
       Parent = ArtClipFrame
