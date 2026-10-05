@@ -1,11 +1,11 @@
 local HttpService = game:GetService("HttpService")
 
 pcall(function()
-    if not isfolder("Napoleon") then
-        makefolder("Napoleon")
+    if not isfolder("ProjectZero") then
+        makefolder("ProjectZero")
     end
-    if not isfolder("Napoleon/Config") then
-        makefolder("Napoleon/Config")
+    if not isfolder("ProjectZero/Config") then
+        makefolder("ProjectZero/Config")
     end
 end)
 
@@ -14,7 +14,7 @@ if univId == "0" or univId == "" then
     univId = tostring(game.PlaceId)
 end
 
-local ConfigFile = "Napoleon/Config/Napoleon_" .. univId .. ".json"
+local ConfigFile = "ProjectZero/Config/ProjectZero_" .. univId .. ".json"
 
 ConfigData       = {}
 Elements         = {}
@@ -66,12 +66,12 @@ end
 -- ============================================================
 -- CONFIG PROFILE SYSTEM
 -- ============================================================
-local PROFILE_FOLDER = "Napoleon/Profiles"
+local PROFILE_FOLDER = "ProjectZero/Profiles"
 
 local function EnsureProfileFolder()
     pcall(function()
-        if not isfolder("Napoleon") then makefolder("Napoleon") end
-        if not isfolder("Napoleon/Config") then makefolder("Napoleon/Config") end
+        if not isfolder("ProjectZero") then makefolder("ProjectZero") end
+        if not isfolder("ProjectZero/Config") then makefolder("ProjectZero/Config") end
         if not isfolder(PROFILE_FOLDER) then makefolder(PROFILE_FOLDER) end
     end)
 end
@@ -349,14 +349,14 @@ function CircleClick(Button, X, Y)
     end)
 end
 
-local Napoleon = {}
-function Napoleon:MakeNotify(NotifyConfig)
+local ProjectZero = {}
+function ProjectZero:MakeNotify(NotifyConfig)
     local NotifyConfig = NotifyConfig or {}
-    NotifyConfig.Title = NotifyConfig.Title or "Napoleon"
+    NotifyConfig.Title = NotifyConfig.Title or "Project Zero"
     NotifyConfig.Description = NotifyConfig.Description or "Notification"
     NotifyConfig.Content = NotifyConfig.Content or "Content"
     NotifyConfig.Icon = NotifyConfig.Icon or "108203634075572"
-    NotifyConfig.Color = NotifyConfig.Color or Color3.fromRGB(150, 150, 150)
+    NotifyConfig.Color = NotifyConfig.Color or Color3.fromRGB(220, 38, 58)
     NotifyConfig.Time = NotifyConfig.Time or 0.5
     NotifyConfig.Delay = NotifyConfig.Delay or 5
     local NotifyFunction = {}
@@ -564,20 +564,21 @@ function Napoleon:MakeNotify(NotifyConfig)
 end
 
 function notif(msg, delay, color, title, desc)
-    return Napoleon:MakeNotify({
-        Title = title or "Napoleon",
+    return ProjectZero:MakeNotify({
+        Title = title or "Project Zero",
         Description = desc or "Notification",
         Content = msg or "Content",
-        Color = color or Color3.fromRGB(150, 150, 150),
+        Color = color or Color3.fromRGB(220, 38, 58),
         Delay = delay or 4
     })
 end
 
-function Napoleon:Window(GuiConfig)
+function ProjectZero:Window(GuiConfig)
     GuiConfig              = GuiConfig or {}
-    GuiConfig.Title        = GuiConfig.Title or "Napoleon"
-    GuiConfig.Footer       = GuiConfig.Footer or "Napoleon >:D"
-    GuiConfig.Color        = GuiConfig.Color or Color3.fromRGB(150, 150, 150)
+    GuiConfig.Title        = GuiConfig.Title or "Project Zero"
+    GuiConfig.Footer       = GuiConfig.Footer or "Project Zero >:D"
+    GuiConfig.Color        = GuiConfig.Color or Color3.fromRGB(220, 38, 58)
+    GuiConfig.Color2       = GuiConfig.Color2 or Color3.fromRGB(14, 2, 5)
     GuiConfig["Tab Width"] = GuiConfig["Tab Width"] or 120
     GuiConfig.Version      = GuiConfig.Version or 1
 
@@ -586,7 +587,7 @@ function Napoleon:Window(GuiConfig)
 
     local GuiFunc = {}
 
-    local NapoleonOnTop = Instance.new("ScreenGui");
+    local ProjectZeroOnTop = Instance.new("ScreenGui");
     local DropShadowHolder = Instance.new("Frame");
     local DropShadow = Instance.new("ImageLabel");
     local Main = Instance.new("Frame");
@@ -613,10 +614,10 @@ function Napoleon:Window(GuiConfig)
     local LayersFolder = Instance.new("Folder");
     local LayersPageLayout = Instance.new("UIPageLayout");
 
-    NapoleonOnTop.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    NapoleonOnTop.Name = "NapoleonOnTop"
-    NapoleonOnTop.ResetOnSpawn = false
-    NapoleonOnTop.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+    ProjectZeroOnTop.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ProjectZeroOnTop.Name = "ProjectZeroOnTop"
+    ProjectZeroOnTop.ResetOnSpawn = false
+    ProjectZeroOnTop.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 
     DropShadowHolder.BackgroundTransparency = 1
 	--DropShadowHolder.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -630,7 +631,7 @@ function Napoleon:Window(GuiConfig)
     end
     DropShadowHolder.ZIndex = 0
     DropShadowHolder.Name = "DropShadowHolder"
-    DropShadowHolder.Parent = NapoleonOnTop
+    DropShadowHolder.Parent = ProjectZeroOnTop
 
     DropShadowHolder.Position = UDim2.new(0.5, 0, 0.5, 0)
     DropShadow.Image = "rbxassetid://6015897843"
@@ -679,7 +680,7 @@ function Napoleon:Window(GuiConfig)
     UICorner3.CornerRadius = UDim.new(0.02, 0)
 
     local MainStroke = Instance.new("UIStroke")
-    MainStroke.Color = Color3.fromRGB(115, 115, 115) -- Outline abu-abu agak terang
+    MainStroke.Color = GuiConfig.Color:Lerp(Color3.new(0, 0, 0), 0.45) -- Outline mengikuti warna tema
     MainStroke.Transparency = 0
     MainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     MainStroke.Thickness = 1.2
@@ -998,7 +999,7 @@ function Napoleon:Window(GuiConfig)
     UICorner2.Parent = LayersTab
 
     DecideFrame.AnchorPoint = Vector2.new(0.5, 0)
-    DecideFrame.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
+    DecideFrame.BackgroundColor3 = GuiConfig.Color
     DecideFrame.BackgroundTransparency = 0
     DecideFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
     DecideFrame.BorderSizePixel = 0
@@ -1020,7 +1021,7 @@ function Napoleon:Window(GuiConfig)
     UICorner6.Parent = Layers
 
 	local WindowImg1 = Instance.new("ImageLabel")
-	WindowImg1.Image = "rbxassetid://" .. GuiConfig.LogoHUB
+	WindowImg1.Image = GuiConfig.LogoHUB and ("rbxassetid://" .. GuiConfig.LogoHUB) or ""
 	WindowImg1.BackgroundTransparency = 1
 	WindowImg1.ImageTransparency = 0.8
 	WindowImg1.BorderSizePixel = 0
@@ -1033,7 +1034,7 @@ function Napoleon:Window(GuiConfig)
     WindowImg1.Visible = false
 
 	local WindowImg2 = Instance.new("ImageLabel")
-	WindowImg2.Image = "rbxassetid://" .. GuiConfig.WindowIMG
+	WindowImg2.Image = GuiConfig.WindowIMG and ("rbxassetid://" .. GuiConfig.WindowIMG) or ""
 	WindowImg2.BackgroundTransparency = 1
 	WindowImg2.ImageTransparency = 0.8
 	WindowImg2.BorderSizePixel = 0
@@ -1163,8 +1164,8 @@ function Napoleon:Window(GuiConfig)
     end)
 
     function GuiFunc:DestroyGui()
-        if CoreGui:FindFirstChild("NapoleonOnTop") then
-            NapoleonOnTop:Destroy()
+        if CoreGui:FindFirstChild("ProjectZeroOnTop") then
+            ProjectZeroOnTop:Destroy()
         end
     end
 
@@ -1207,11 +1208,11 @@ function Napoleon:Window(GuiConfig)
 
         local Gradient = Instance.new("UIGradient")
         Gradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0.0, Color3.fromRGB(0, 191, 255)),
+            ColorSequenceKeypoint.new(0.0, GuiConfig.Color:Lerp(Color3.new(1, 1, 1), 0.3)),
             ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 255, 255)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 140, 255)),
+            ColorSequenceKeypoint.new(0.5, GuiConfig.Color),
             ColorSequenceKeypoint.new(0.75, Color3.fromRGB(255, 255, 255)),
-            ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 191, 255))
+            ColorSequenceKeypoint.new(1.0, GuiConfig.Color:Lerp(Color3.new(1, 1, 1), 0.3))
         })
         Gradient.Rotation = 90
         Gradient.Parent = DialogGlow
@@ -1221,7 +1222,7 @@ function Napoleon:Window(GuiConfig)
         Title.Position = UDim2.new(0, 0, 0, 4)
         Title.BackgroundTransparency = 1
         Title.Font = Enum.Font.GothamBold
-        Title.Text = "Napoleon Window"
+        Title.Text = "Project Zero Window"
         Title.TextSize = 22
         Title.TextColor3 = Color3.fromRGB(255, 255, 255)
         Title.ZIndex = 52
@@ -1270,9 +1271,9 @@ function Napoleon:Window(GuiConfig)
         Instance.new("UICorner", Cancel).CornerRadius = UDim.new(0, 6)
 
         Yes.MouseButton1Click:Connect(function()
-            if NapoleonOnTop then NapoleonOnTop:Destroy() end
-            if game.CoreGui:FindFirstChild("ToggleUINapoleon") then
-                game.CoreGui.ToggleUINapoleon:Destroy()
+            if ProjectZeroOnTop then ProjectZeroOnTop:Destroy() end
+            if game.CoreGui:FindFirstChild("ToggleUIProjectZero") then
+                game.CoreGui.ToggleUIProjectZero:Destroy()
             end
         end)
 
@@ -1295,7 +1296,7 @@ function Napoleon:Window(GuiConfig)
         local ScreenGui = Instance.new("ScreenGui")
         ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
         ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        ScreenGui.Name = "ToggleUINapoleon"
+        ScreenGui.Name = "ToggleUIProjectZero"
 
         local MainButton = Instance.new("ImageLabel")
         MainButton.Parent = ScreenGui
@@ -1471,7 +1472,7 @@ function Napoleon:Window(GuiConfig)
     UICorner36.CornerRadius = UDim.new(0, 3)
     UICorner36.Parent = DropdownSelect
 
-    UIStroke14.Color = Color3.fromRGB(12, 159, 255)
+    UIStroke14.Color = GuiConfig.Color
     UIStroke14.Thickness = 2.5
     UIStroke14.Transparency = 0.8
     UIStroke14.Parent = DropdownSelect
@@ -2557,12 +2558,12 @@ function Napoleon:Window(GuiConfig)
                     SaveConfig()
                     if Value then
                         TweenService:Create(ToggleTitle, TweenInfo.new(0.2), { TextColor3 = Color3.fromRGB(255, 255, 255) }):Play()
-                        TweenService:Create(ToggleCircle, TweenInfo.new(0.2), { Position = UDim2.new(0, 15, 0, 0), BackgroundColor3 = Color3.fromRGB(46, 46, 46) })
+                        TweenService:Create(ToggleCircle, TweenInfo.new(0.2), { Position = UDim2.new(0, 15, 0, 0), BackgroundColor3 = Color3.fromRGB(255, 255, 255) })
                             :Play()
-                        TweenService:Create(UIStroke8, TweenInfo.new(0.2), { Color = Color3.fromRGB(255, 255, 255), Transparency = 0 })
+                        TweenService:Create(UIStroke8, TweenInfo.new(0.2), { Color = GuiConfig.Color, Transparency = 0 })
                             :Play()
                         TweenService:Create(FeatureFrame2, TweenInfo.new(0.2),
-                            { BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0 }):Play()
+                            { BackgroundColor3 = GuiConfig.Color, BackgroundTransparency = 0 }):Play()
                     else
                         TweenService:Create(ToggleTitle, TweenInfo.new(0.2),
                             { TextColor3 = Color3.fromRGB(230, 230, 230) }):Play()
@@ -3550,15 +3551,16 @@ function Napoleon:Window(GuiConfig)
             local ThemeSection = SettingsTab:AddSection("Theme")
 
             local themePresets = {
-                ["Blue"]  = { color = Color3.fromRGB(150, 150, 150),  color2 = Color3.fromRGB(0, 0, 14) },
-                ["Red"] = { color = Color3.fromRGB(255, 66, 66),  color2 = Color3.fromRGB(14, 0, 0) },
-                ["Purple"]  = { color = Color3.fromRGB(160, 30, 255), color2 = Color3.fromRGB(10, 0, 14) },
+                ["Crimson"] = { color = Color3.fromRGB(220, 38, 58),  color2 = Color3.fromRGB(14, 2, 5) },
+                ["Ice"]     = { color = Color3.fromRGB(34, 211, 238), color2 = Color3.fromRGB(0, 8, 14) },
+                ["Violet"]  = { color = Color3.fromRGB(160, 30, 255), color2 = Color3.fromRGB(10, 0, 14) },
+                ["Mono"]    = { color = Color3.fromRGB(150, 150, 150), color2 = Color3.fromRGB(0, 0, 14) },
             }
 
             ThemeSection:AddDropdown({
                 Title   = "Theme",
-                Options = { "Blue", "Red", "Purple" },
-                Default = "Blue",
+                Options = { "Crimson", "Ice", "Violet", "Mono" },
+                Default = "Crimson",
                 Callback = function(value)
                     local preset = themePresets[value]
                     if preset then
@@ -3595,7 +3597,9 @@ function Napoleon:Window(GuiConfig)
         end
 
         -- Update border stroke & DecideFrame
-        -- TweenService:Create(_themeColorElements.mainStroke, TweenInfo.new(0.4), { Color = newColor }):Play()
+        TweenService:Create(_themeColorElements.mainStroke, TweenInfo.new(0.4), { Color = newColor:Lerp(Color3.new(0, 0, 0), 0.45) }):Play()
+        TweenService:Create(UIStroke14, TweenInfo.new(0.4), { Color = newColor }):Play()
+        TweenService:Create(SearchBarStroke, TweenInfo.new(0.4), { Color = newColor }):Play()
         TweenService:Create(_themeColorElements.decideFrm, TweenInfo.new(0.4), { BackgroundColor3 = newColor }):Play()
 
         -- Update window background (Color2)
@@ -3615,8 +3619,8 @@ function Napoleon:Window(GuiConfig)
             end
         end
 
-        -- Update semua elemen di dalam NapoleonOnTop secara langsung
-        for _, gui in NapoleonOnTop:GetDescendants() do
+        -- Update semua elemen di dalam ProjectZeroOnTop secara langsung
+        for _, gui in ProjectZeroOnTop:GetDescendants() do
             if gui.Name == "SectionTitle" and gui:IsA("TextLabel") then
                 local sectionReal = gui.Parent
                 if sectionReal and sectionReal.Name == "SectionReal" then
@@ -3657,6 +3661,15 @@ function Napoleon:Window(GuiConfig)
                 end
             end
 
+            -- Slider (garis terisi, bulatan, dan outline bulatan)
+            if (gui.Name == "SliderDraggable" or gui.Name == "SliderCircle") and gui:IsA("Frame") then
+                TweenService:Create(gui, TweenInfo.new(0.3), { BackgroundColor3 = newColor }):Play()
+                local stk = gui:FindFirstChildOfClass("UIStroke")
+                if stk then
+                    TweenService:Create(stk, TweenInfo.new(0.3), { Color = newColor }):Play()
+                end
+            end
+
             -- Toggle yang sedang ON (FeatureFrame.BackgroundTransparency ≈ 0)
             if gui.Name == "FeatureFrame" and gui:IsA("Frame") and gui.Parent and gui.Parent.Name == "Toggle" then
                 if gui.BackgroundTransparency < 0.1 then
@@ -3671,7 +3684,7 @@ function Napoleon:Window(GuiConfig)
                     if toggleParent then
                         local ttl = toggleParent:FindFirstChild("ToggleTitle")
                         if ttl then
-                            TweenService:Create(ttl, TweenInfo.new(0.3), { TextColor3 = newColor }):Play()
+                            TweenService:Create(ttl, TweenInfo.new(0.3), { TextColor3 = Color3.fromRGB(255, 255, 255) }):Play()
                         end
                     end
                 end
@@ -3688,9 +3701,9 @@ end
 -- -- ============================================================
 -- local ICON_ID = "108203634075572"
 -- local function notif(content, duration, title)
---     if Napoleon and Napoleon.MakeNotify then
---         Napoleon:MakeNotify({
---             Title   = title or "Napoleon",
+--     if ProjectZero and ProjectZero.MakeNotify then
+--         ProjectZero:MakeNotify({
+--             Title   = title or "Project Zero",
 --             Content = content,
 --             Delay   = duration or 4,
 --             Icon    = ICON_ID
@@ -3706,8 +3719,8 @@ end
 --     GameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
 -- end)
 
--- local Window = Napoleon:Window({
---     Title    = "Napoleon",
+-- local Window = ProjectZero:Window({
+--     Title    = "Project Zero",
 --     Footer   = GameName,
 --     Color    = Color3.fromRGB(150, 150, 150),
 --     Color2   = Color3.fromRGB(0, 0, 14),
@@ -3720,7 +3733,7 @@ end
 
 -- local function LoadInfoTab()
 --     local InfoTab = Tabs:AddTab({ Name = "About", Icon = "info" })
---     local InfoSection = InfoTab:AddSection("About Napoleon", true)
+--     local InfoSection = InfoTab:AddSection("About Project Zero", true)
 
 --     local inviteCode = "napoleonontop"
 --     local discordLink = "https://discord.gg/" .. inviteCode
@@ -3733,7 +3746,7 @@ end
 --         ButtonCallback = function()
 --             if setclipboard then
 --                 setclipboard(discordLink)
---                 notif("Successfully copied the link!", 3, "Napoleon")
+--                 notif("Successfully copied the link!", 3, "Project Zero")
 --             end
 --         end
 --     })
@@ -3877,4 +3890,4 @@ end
 -- -- Panggil fungsi untuk menambahkan tab config di urutan paling akhir
 -- Tabs:AddConfigTab()
 
-return Napoleon
+return ProjectZero
