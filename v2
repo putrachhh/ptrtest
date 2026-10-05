@@ -349,6 +349,21 @@ function CircleClick(Button, X, Y)
     end)
 end
 
+local CurrentAccent = Color3.fromRGB(192, 192, 192)
+
+-- Pilih teks gelap atau putih otomatis sesuai terang-gelapnya warna aksen
+local function GetContrastColor(color)
+    local function lin(c)
+        if c <= 0.03928 then return c / 12.92 end
+        return ((c + 0.055) / 1.055) ^ 2.4
+    end
+    local lum = 0.2126 * lin(color.R) + 0.7152 * lin(color.G) + 0.0722 * lin(color.B)
+    if lum > 0.25 then
+        return Color3.fromRGB(10, 10, 10)
+    end
+    return Color3.fromRGB(255, 255, 255)
+end
+
 local ProjectZero = {}
 function ProjectZero:MakeNotify(NotifyConfig)
     local NotifyConfig = NotifyConfig or {}
@@ -356,7 +371,7 @@ function ProjectZero:MakeNotify(NotifyConfig)
     NotifyConfig.Description = NotifyConfig.Description or "Notification"
     NotifyConfig.Content = NotifyConfig.Content or "Content"
     NotifyConfig.Icon = NotifyConfig.Icon or "108203634075572"
-    NotifyConfig.Color = NotifyConfig.Color or Color3.fromRGB(220, 38, 58)
+    NotifyConfig.Color = NotifyConfig.Color or CurrentAccent
     NotifyConfig.Time = NotifyConfig.Time or 0.5
     NotifyConfig.Delay = NotifyConfig.Delay or 5
     local NotifyFunction = {}
@@ -568,7 +583,7 @@ function notif(msg, delay, color, title, desc)
         Title = title or "Project Zero",
         Description = desc or "Notification",
         Content = msg or "Content",
-        Color = color or Color3.fromRGB(220, 38, 58),
+        Color = color or CurrentAccent,
         Delay = delay or 4
     })
 end
@@ -577,8 +592,9 @@ function ProjectZero:Window(GuiConfig)
     GuiConfig              = GuiConfig or {}
     GuiConfig.Title        = GuiConfig.Title or "Project Zero"
     GuiConfig.Footer       = GuiConfig.Footer or "Project Zero >:D"
-    GuiConfig.Color        = GuiConfig.Color or Color3.fromRGB(220, 38, 58)
-    GuiConfig.Color2       = GuiConfig.Color2 or Color3.fromRGB(14, 2, 5)
+    GuiConfig.Color        = GuiConfig.Color or Color3.fromRGB(192, 192, 192)
+    GuiConfig.Color2       = GuiConfig.Color2 or Color3.fromRGB(10, 10, 10)
+    CurrentAccent          = GuiConfig.Color
     GuiConfig["Tab Width"] = GuiConfig["Tab Width"] or 120
     GuiConfig.Version      = GuiConfig.Version or 1
 
@@ -696,7 +712,7 @@ function ProjectZero:Window(GuiConfig)
 
     TextLabel.Font = Enum.Font.GothamBold
     TextLabel.Text = GuiConfig.Title
-    TextLabel.TextColor3 = Color3.fromRGB(170, 170, 170)
+    TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     TextLabel.TextSize = 14
     TextLabel.TextXAlignment = Enum.TextXAlignment.Left
     TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -760,7 +776,7 @@ function ProjectZero:Window(GuiConfig)
     TextLabel1.BackgroundTransparency = 1
     TextLabel1.Font = Enum.Font.GothamBold
     TextLabel1.Text = GuiConfig.Footer
-    TextLabel1.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TextLabel1.TextColor3 = GetContrastColor(GuiConfig.Color)
     TextLabel1.TextSize = 12
     TextLabel1.TextXAlignment = Enum.TextXAlignment.Center
     TextLabel1.AutomaticSize = Enum.AutomaticSize.X
@@ -795,7 +811,7 @@ function ProjectZero:Window(GuiConfig)
     ExecutorTextLabel.BackgroundTransparency = 1
     ExecutorTextLabel.Font = Enum.Font.GothamBold
     ExecutorTextLabel.Text = execText
-    ExecutorTextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ExecutorTextLabel.TextColor3 = GetContrastColor(GuiConfig.Color)
     ExecutorTextLabel.TextSize = 12
     ExecutorTextLabel.TextXAlignment = Enum.TextXAlignment.Center
     ExecutorTextLabel.AutomaticSize = Enum.AutomaticSize.X
@@ -2558,7 +2574,7 @@ function ProjectZero:Window(GuiConfig)
                     SaveConfig()
                     if Value then
                         TweenService:Create(ToggleTitle, TweenInfo.new(0.2), { TextColor3 = Color3.fromRGB(255, 255, 255) }):Play()
-                        TweenService:Create(ToggleCircle, TweenInfo.new(0.2), { Position = UDim2.new(0, 15, 0, 0), BackgroundColor3 = Color3.fromRGB(255, 255, 255) })
+                        TweenService:Create(ToggleCircle, TweenInfo.new(0.2), { Position = UDim2.new(0, 15, 0, 0), BackgroundColor3 = GetContrastColor(GuiConfig.Color) })
                             :Play()
                         TweenService:Create(UIStroke8, TweenInfo.new(0.2), { Color = GuiConfig.Color, Transparency = 0 })
                             :Play()
@@ -3551,16 +3567,17 @@ function ProjectZero:Window(GuiConfig)
             local ThemeSection = SettingsTab:AddSection("Theme")
 
             local themePresets = {
-                ["Crimson"] = { color = Color3.fromRGB(220, 38, 58),  color2 = Color3.fromRGB(14, 2, 5) },
-                ["Ice"]     = { color = Color3.fromRGB(34, 211, 238), color2 = Color3.fromRGB(0, 8, 14) },
-                ["Violet"]  = { color = Color3.fromRGB(160, 30, 255), color2 = Color3.fromRGB(10, 0, 14) },
-                ["Mono"]    = { color = Color3.fromRGB(150, 150, 150), color2 = Color3.fromRGB(0, 0, 14) },
+                ["Silver"]   = { color = Color3.fromRGB(192, 192, 192), color2 = Color3.fromRGB(10, 10, 10) },
+                ["Platinum"] = { color = Color3.fromRGB(229, 228, 226), color2 = Color3.fromRGB(10, 10, 10) },
+                ["Crimson"]  = { color = Color3.fromRGB(220, 38, 58),   color2 = Color3.fromRGB(14, 2, 5) },
+                ["Ice"]      = { color = Color3.fromRGB(34, 211, 238),  color2 = Color3.fromRGB(0, 8, 14) },
+                ["Violet"]   = { color = Color3.fromRGB(160, 30, 255),  color2 = Color3.fromRGB(10, 0, 14) },
             }
 
             ThemeSection:AddDropdown({
                 Title   = "Theme",
-                Options = { "Crimson", "Ice", "Violet", "Mono" },
-                Default = "Crimson",
+                Options = { "Silver", "Platinum", "Crimson", "Ice", "Violet" },
+                Default = "Silver",
                 Callback = function(value)
                     local preset = themePresets[value]
                     if preset then
@@ -3586,6 +3603,7 @@ function ProjectZero:Window(GuiConfig)
     function Tabs:SetTheme(newColor, newColor2)
         GuiConfig.Color  = newColor
         GuiConfig.Color2 = newColor2 or newColor
+        CurrentAccent    = newColor
 
         -- Update topbar (Title & Footer text)
         -- TweenService:Create(_themeColorElements.titleLabel, TweenInfo.new(0.4), { TextColor3 = newColor }):Play()
@@ -3599,6 +3617,8 @@ function ProjectZero:Window(GuiConfig)
         -- Update border stroke & DecideFrame
         TweenService:Create(_themeColorElements.mainStroke, TweenInfo.new(0.4), { Color = newColor:Lerp(Color3.new(0, 0, 0), 0.45) }):Play()
         TweenService:Create(UIStroke14, TweenInfo.new(0.4), { Color = newColor }):Play()
+        TweenService:Create(TextLabel1, TweenInfo.new(0.4), { TextColor3 = GetContrastColor(newColor) }):Play()
+        TweenService:Create(ExecutorTextLabel, TweenInfo.new(0.4), { TextColor3 = GetContrastColor(newColor) }):Play()
         TweenService:Create(SearchBarStroke, TweenInfo.new(0.4), { Color = newColor }):Play()
         TweenService:Create(_themeColorElements.decideFrm, TweenInfo.new(0.4), { BackgroundColor3 = newColor }):Play()
 
@@ -3678,6 +3698,11 @@ function ProjectZero:Window(GuiConfig)
                     local stk = gui:FindFirstChildOfClass("UIStroke")
                     if stk then
                         TweenService:Create(stk, TweenInfo.new(0.3), { Color = newColor }):Play()
+                    end
+                    -- knob toggle ikut kontras terhadap warna aksen baru
+                    local knob = gui:FindFirstChild("ToggleCircle")
+                    if knob then
+                        TweenService:Create(knob, TweenInfo.new(0.3), { BackgroundColor3 = GetContrastColor(newColor) }):Play()
                     end
                     -- update juga teks judul toggle yang ON
                     local toggleParent = gui.Parent
