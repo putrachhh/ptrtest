@@ -599,8 +599,9 @@ function ProjectZero:Window(GuiConfig)
     GuiConfig              = GuiConfig or {}
     GuiConfig.Title        = GuiConfig.Title or "Project Zero"
     GuiConfig.Footer       = GuiConfig.Footer or "Project Zero >:D"
-    GuiConfig.Color        = GuiConfig.Color or Color3.fromRGB(145, 70, 255)  -- ungu
-    GuiConfig.Color2       = GuiConfig.Color2 or Color3.fromRGB(6, 6, 6)      -- hitam
+    -- Palet tetap: Hitam + Putih + Ungu (tanpa pilihan tema)
+    GuiConfig.Color        = Color3.fromRGB(145, 70, 255)  -- ungu (aksen: border, tab, badge, toggle)
+    GuiConfig.Color2       = Color3.fromRGB(60, 24, 115)   -- latar window: ungu gelap -> hitam (lewat gradient)
     CurrentAccent          = GuiConfig.Color
     GuiConfig["Tab Width"] = GuiConfig["Tab Width"] or 120
     GuiConfig.Version      = GuiConfig.Version or 1
@@ -763,7 +764,7 @@ function ProjectZero:Window(GuiConfig)
     FooterFrame.LayoutOrder = 1
     FooterFrame.Size = UDim2.new(0, 0, 0.6, 0)
     FooterFrame.BackgroundColor3 = GuiConfig.Color
-    FooterFrame.BackgroundTransparency = 0
+    FooterFrame.BackgroundTransparency = 0.35
     FooterFrame.BorderSizePixel = 0
     FooterFrame.AutomaticSize = Enum.AutomaticSize.X
     FooterFrame.Parent = RightContainer
@@ -797,7 +798,7 @@ function ProjectZero:Window(GuiConfig)
     Executor.LayoutOrder = 4
     Executor.Size = UDim2.new(0, 0, 0.6, 0)
     Executor.BackgroundColor3 = GuiConfig.Color
-    Executor.BackgroundTransparency = 0
+    Executor.BackgroundTransparency = 0.35
     Executor.BorderSizePixel = 0
     Executor.AutomaticSize = Enum.AutomaticSize.X
     Executor.Parent = RightContainer
@@ -838,7 +839,7 @@ function ProjectZero:Window(GuiConfig)
             frame.LayoutOrder = order
             frame.Size = UDim2.new(0, 0, 0.6, 0)
             frame.BackgroundColor3 = GuiConfig.Color
-            frame.BackgroundTransparency = 0
+            frame.BackgroundTransparency = 0.35
             frame.BorderSizePixel = 0
             frame.AutomaticSize = Enum.AutomaticSize.X
             frame.Parent = RightContainer
@@ -3769,31 +3770,6 @@ function ProjectZero:Window(GuiConfig)
                         end
                     end
                     cnotif("Config imported successfully!", 4)
-                end
-            })
-
-
-            -- ═══ THEME SECTION ═══
-            local ThemeSection = SettingsTab:AddSection("Theme")
-
-            local themePresets = {
-                ["Black Purple"] = { color = Color3.fromRGB(145, 70, 255), color2 = Color3.fromRGB(6, 6, 6) },
-                ["Silver"]   = { color = Color3.fromRGB(192, 192, 192), color2 = Color3.fromRGB(10, 10, 10) },
-                ["Platinum"] = { color = Color3.fromRGB(229, 228, 226), color2 = Color3.fromRGB(10, 10, 10) },
-                ["Crimson"]  = { color = Color3.fromRGB(220, 38, 58),   color2 = Color3.fromRGB(14, 2, 5) },
-                ["Ice"]      = { color = Color3.fromRGB(34, 211, 238),  color2 = Color3.fromRGB(0, 8, 14) },
-                ["Violet"]   = { color = Color3.fromRGB(160, 30, 255),  color2 = Color3.fromRGB(10, 0, 14) },
-            }
-
-            ThemeSection:AddDropdown({
-                Title   = "Theme",
-                Options = { "Black Purple", "Silver", "Platinum", "Crimson", "Ice", "Violet" },
-                Default = "Black Purple",
-                Callback = function(value)
-                    local preset = themePresets[value]
-                    if preset then
-                        Tabs:SetTheme(preset.color, preset.color2)
-                    end
                 end
             })
         end)
