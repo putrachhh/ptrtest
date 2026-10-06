@@ -376,27 +376,28 @@ function ProjectZero:MakeNotify(NotifyConfig)
     NotifyConfig.Delay = NotifyConfig.Delay or 5
     local NotifyFunction = {}
     spawn(function()
-        if not CoreGui:FindFirstChild("NotifyGui") then
-            local NotifyGui = Instance.new("ScreenGui");
-            NotifyGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-            NotifyGui.Name = "NotifyGui"
-            NotifyGui.Parent = CoreGui
+        if not CoreGui:FindFirstChild("PZNotifyGui") then
+            local PZNotifyGui = Instance.new("ScreenGui");
+            PZNotifyGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+            PZNotifyGui.Name = "PZNotifyGui"
+            PZNotifyGui.Parent = CoreGui
         end
-        if not CoreGui.NotifyGui:FindFirstChild("NotifyLayout") then
-            local NotifyLayout = Instance.new("Frame");
-            NotifyLayout.AnchorPoint = Vector2.new(1, 0)
-            NotifyLayout.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            NotifyLayout.BackgroundTransparency = 0.9990000128746033
-            NotifyLayout.BorderColor3 = Color3.fromRGB(0, 0, 0)
-            NotifyLayout.BorderSizePixel = 0
-            NotifyLayout.Position = UDim2.new(1, -30, 0, 30)
-            NotifyLayout.Size = UDim2.new(0, 320, 1, 0)
-            NotifyLayout.Name = "NotifyLayout"
-            NotifyLayout.Parent = CoreGui.NotifyGui
+        if not CoreGui.PZNotifyGui:FindFirstChild("PZNotifyLayout") then
+            local PZNotifyLayout = Instance.new("Frame");
+            PZNotifyLayout.AnchorPoint = Vector2.new(1, 0)
+            PZNotifyLayout.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            PZNotifyLayout.BackgroundTransparency = 0.9990000128746033
+            PZNotifyLayout.BorderColor3 = Color3.fromRGB(0, 0, 0)
+            PZNotifyLayout.BorderSizePixel = 0
+            PZNotifyLayout.Position = UDim2.new(1, -30, 0, 30)
+            PZNotifyLayout.Size = UDim2.new(0, 320, 1, 0)
+            PZNotifyLayout.Name = "PZNotifyLayout"
+            PZNotifyLayout.Parent = CoreGui.PZNotifyGui
             local Count = 0
-            CoreGui.NotifyGui.NotifyLayout.ChildRemoved:Connect(function()
+            CoreGui.PZNotifyGui.PZNotifyLayout.ChildRemoved:Connect(function()
                 Count = 0
-                for i, v in CoreGui.NotifyGui.NotifyLayout:GetChildren() do
+                for i, v in CoreGui.PZNotifyGui.PZNotifyLayout:GetChildren() do
+                    if v.Name ~= "NotifyFrame" then continue end
                     TweenService:Create(
                         v,
                         TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
@@ -407,7 +408,8 @@ function ProjectZero:MakeNotify(NotifyConfig)
             end)
         end
         local NotifyPosHeigh = 0
-        for i, v in CoreGui.NotifyGui.NotifyLayout:GetChildren() do
+        for i, v in CoreGui.PZNotifyGui.PZNotifyLayout:GetChildren() do
+            if v.Name ~= "NotifyFrame" then continue end
             NotifyPosHeigh = v.Position.Y.Offset + v.Size.Y.Offset + 12
         end
         local NotifyFrame = Instance.new("Frame");
@@ -429,7 +431,7 @@ function ProjectZero:MakeNotify(NotifyConfig)
         NotifyFrame.Size = UDim2.new(1, 0, 0, 150)
         NotifyFrame.Name = "NotifyFrame"
         NotifyFrame.BackgroundTransparency = 1
-        NotifyFrame.Parent = CoreGui.NotifyGui.NotifyLayout
+        NotifyFrame.Parent = CoreGui.PZNotifyGui.PZNotifyLayout
         NotifyFrame.AnchorPoint = Vector2.new(0, 0)
         NotifyFrame.Position = UDim2.new(0, 0, 0, NotifyPosHeigh)
 
@@ -1141,7 +1143,7 @@ function ProjectZero:Window(GuiConfig)
                         if sectionAdd and sectionReal then
                             local sectionVisible = false
                             for _, item in pairs(sectionAdd:GetChildren()) do
-                                if item.Name ~= "UIListLayout" and item.Name ~= "UICorner" then
+                                if item:IsA("GuiObject") then
                                     local match = false
                                     for _, desc in pairs(item:GetDescendants()) do
                                         if desc:IsA("TextLabel") and (string.find(desc.Name, "Title") or string.find(desc.Name, "Text")) then
@@ -1671,6 +1673,9 @@ function ProjectZero:Window(GuiConfig)
         local Sections = {}
         local CountSection = 0
         function Sections:AddSection(Title, AlwaysOpen)
+            -- Default: section langsung terbuka & tidak bisa ditutup (gaya Zeroin).
+            -- Mau section yang bisa buka-tutup? Pakai AddSection("Judul", false)
+            if AlwaysOpen == nil then AlwaysOpen = true end
             local Title = Title or "Title"
             local Section = Instance.new("Frame");
             local UICorner1 = Instance.new("UICorner");
@@ -1766,7 +1771,7 @@ function ProjectZero:Window(GuiConfig)
 
             SectionAdd.AnchorPoint = Vector2.new(0.5, 0)
             SectionAdd.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            SectionAdd.BackgroundTransparency = 0.9990000128746033
+            SectionAdd.BackgroundTransparency = 0.94 -- kartu: sedikit lebih terang dari window
             SectionAdd.BorderColor3 = Color3.fromRGB(0, 0, 0)
             SectionAdd.BorderSizePixel = 0
             SectionAdd.ClipsDescendants = true
@@ -1776,8 +1781,26 @@ function ProjectZero:Window(GuiConfig)
             SectionAdd.Name = "SectionAdd"
             SectionAdd.Parent = Section
 
-            UICorner8.CornerRadius = UDim.new(0, 2)
+            UICorner8.CornerRadius = UDim.new(0, 6)
             UICorner8.Parent = SectionAdd
+
+            -- ═══ KARTU SECTION (bingkai tipis berwarna aksen + padding dalam) ═══
+            local CARD_PAD = 5
+            local CardStroke = Instance.new("UIStroke")
+            CardStroke.Name = "CardStroke"
+            CardStroke.Color = GuiConfig.Color
+            CardStroke.Thickness = 1
+            CardStroke.Transparency = 0.55
+            CardStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+            CardStroke.Parent = SectionAdd
+
+            local CardPadding = Instance.new("UIPadding")
+            CardPadding.Name = "CardPadding"
+            CardPadding.PaddingTop = UDim.new(0, CARD_PAD)
+            CardPadding.PaddingBottom = UDim.new(0, CARD_PAD)
+            CardPadding.PaddingLeft = UDim.new(0, CARD_PAD)
+            CardPadding.PaddingRight = UDim.new(0, CARD_PAD)
+            CardPadding.Parent = SectionAdd
 
             UIListLayout2.Padding = UDim.new(0, 3)
             UIListLayout2.SortOrder = Enum.SortOrder.LayoutOrder
@@ -1797,9 +1820,9 @@ function ProjectZero:Window(GuiConfig)
 
             local function UpdateSizeSection()
                 if OpenSection then
-                    local SectionSizeYWitdh = 38
+                    local SectionSizeYWitdh = 38 + CARD_PAD * 2
                     for _, v in SectionAdd:GetChildren() do
-                        if v.Name ~= "UIListLayout" and v.Name ~= "UICorner" and v.Visible then
+                        if v:IsA("GuiObject") and v.Visible then
                             SectionSizeYWitdh = SectionSizeYWitdh + v.Size.Y.Offset + 3
                         end
                     end
@@ -1818,10 +1841,8 @@ function ProjectZero:Window(GuiConfig)
                 SectionButton:Destroy()
                 FeatureFrame:Destroy()
                 OpenSection = true
-                UpdateSizeSection()
             elseif AlwaysOpen == false then
                 OpenSection = true
-                UpdateSizeSection()
             else
                 OpenSection = false
             end
@@ -1845,9 +1866,9 @@ function ProjectZero:Window(GuiConfig)
 
             if AlwaysOpen == true or AlwaysOpen == false then
                 OpenSection = true
-                local SectionSizeYWitdh = 38
+                local SectionSizeYWitdh = 38 + CARD_PAD * 2
                 for _, v in SectionAdd:GetChildren() do
-                    if v.Name ~= "UIListLayout" and v.Name ~= "UICorner" and v.Visible then
+                    if v:IsA("GuiObject") and v.Visible then
                         SectionSizeYWitdh = SectionSizeYWitdh + v.Size.Y.Offset + 3
                     end
                 end
@@ -3652,6 +3673,11 @@ function ProjectZero:Window(GuiConfig)
                 end
             end
 
+            -- Bingkai kartu section
+            if gui.Name == "CardStroke" and gui:IsA("UIStroke") then
+                TweenService:Create(gui, TweenInfo.new(0.4), { Color = newColor }):Play()
+            end
+
             -- SubSection label
             if gui.Name == "SubSection" and gui:IsA("Frame") then
                 local lbl = gui:FindFirstChildOfClass("TextLabel")
@@ -3720,199 +3746,5 @@ function ProjectZero:Window(GuiConfig)
 
     return Tabs
 end
-
--- -- ============================================================
--- -- UI TESTING / EXECUTION
--- -- ============================================================
--- local ICON_ID = "108203634075572"
--- local function notif(content, duration, title)
---     if ProjectZero and ProjectZero.MakeNotify then
---         ProjectZero:MakeNotify({
---             Title   = title or "Project Zero",
---             Content = content,
---             Delay   = duration or 4,
---             Icon    = ICON_ID
---         })
---     end
--- end
-
--- local MarketplaceService = game:GetService("MarketplaceService")
-
--- local GameName = "Unknown"
-
--- pcall(function()
---     GameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
--- end)
-
--- local Window = ProjectZero:Window({
---     Title    = "Project Zero",
---     Footer   = GameName,
---     Color    = Color3.fromRGB(150, 150, 150),
---     Color2   = Color3.fromRGB(0, 0, 14),
---     ["Tab Width"] = 130,
---     Image      = "76157300179532",
---     WindowIMG  = "91334002283698",
---     LogoHUB    = "122210019620425"
--- })
--- local Tabs = Window
-
--- local function LoadInfoTab()
---     local InfoTab = Tabs:AddTab({ Name = "About", Icon = "info" })
---     local InfoSection = InfoTab:AddSection("About Project Zero", true)
-
---     local inviteCode = "napoleonontop"
---     local discordLink = "https://discord.gg/" .. inviteCode
-
---     local DiscordParagraph = InfoSection:AddParagraph({
---         Title          = "Loading...",
---         Icon           = "nplnv4",
---         Content        = "Members: Loading... | Online: Loading...",
---         ButtonText     = "Copy Link",
---         ButtonCallback = function()
---             if setclipboard then
---                 setclipboard(discordLink)
---                 notif("Successfully copied the link!", 3, "Project Zero")
---             end
---         end
---     })
-
---     task.spawn(function()
---         pcall(function()
---             local req = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
---             local res
---             if req then
---                 res = req({
---                     Url = "https://discord.com/api/v9/invites/" .. inviteCode .. "?with_counts=true",
---                     Method = "GET"
---                 })
---                 res = res.Body
---             else
---                 res = game:HttpGet("https://discord.com/api/v9/invites/" .. inviteCode .. "?with_counts=true")
---             end
-            
---             local decoded = game:GetService("HttpService"):JSONDecode(res)
---             if decoded and decoded.guild then
---                 DiscordParagraph:SetTitle(decoded.guild.name)
---                 DiscordParagraph:SetContent("Members: " .. tostring(decoded.approximate_member_count) .. " | Online: " .. tostring(decoded.approximate_presence_count))
---             end
---         end)
---     end)
-
--- 	InfoSection:AddButton({ Title = "Tes", Callback = function(value) end })
--- end
-
--- local function LoadMainTab()
---     local MainTab = Tabs:AddTab({ Name = "Main", Icon = "home" })
-    
---     local DemoSection = MainTab:AddSection("Elements Showcase")
-
---     -- DemoSection:AddParagraph({
---     --     Title          = "Paragraph Demo",
---     --     Content        = "This is a paragraph example.\nYou can write multiline descriptions here.",
---     --     ButtonText     = "Click Me",
---     --     ButtonCallback = function()
---     --         notif("Paragraph button clicked!", 2)
---     --     end
---     -- })
-
---     -- DemoSection:AddButton({
---     --     Title = "Normal Button",
---     --     Callback = function()
---     --         notif("Normal button clicked!", 2)
---     --     end
---     -- })
-
---     -- DemoSection:AddButton({
---     --     Title       = "Dual Button",
---     --     SubTitle    = "Second Button",
---     --     Callback    = function()
---     --         notif("Main button clicked!", 2)
---     --     end,
---     --     SubCallback = function()
---     --         notif("Sub button clicked!", 2)
---     --     end
---     -- })
-
---     -- DemoSection:AddDivider()
-
---     -- DemoSection:AddSubSection("Toggles & Sliders")
-
---     DemoSection:AddToggle({
---         Title    = "Example Toggle",
---         Default  = false,
---         Keybind  = true,
---         Callback = function(value)
---             notif("Toggle is now: " .. tostring(value), 2)
---         end
---     })
-
---     -- DemoSection:AddSlider({
---     --     Title     = "Example Slider",
---     --     Increment = 1,
---     --     Min       = 1,
---     --     Max       = 100,
---     --     Default   = 50,
---     --     Callback  = function(value)
---     --         -- notif("Slider value: " .. tostring(value), 2)
---     --     end
---     -- })
-
---     -- DemoSection:AddDivider()
-
---     -- DemoSection:AddSubSection("Inputs & Dropdowns")
-
---     -- DemoSection:AddInput({
---     --     Title    = "Example Input",
---     --     Content  = "Type something and press enter",
---     --     Default  = "",
---     --     Callback = function(val)
---     --         notif("Input submitted: " .. tostring(val), 2)
---     --     end
---     -- })
-
---     -- DemoSection:AddInput({
---     --     Title    = "Example Input 2",
---     --     Callback = function(val)
---     --         notif("Input submitted: " .. tostring(val), 2)
---     --     end
---     -- })
-
---     -- DemoSection:AddPanel({
---     --     Title       = "Example Panel",
---     --     Placeholder = "Enter text here...",
---     --     ButtonText  = "Submit Panel",
---     --     Callback    = function(val)
---     --         notif("Panel submitted: " .. tostring(val), 2)
---     --     end
---     -- })
-
---     -- DemoSection:AddDropdown({
---     --     Title    = "Single Dropdown",
---     --     Content  = "Select one option",
---     --     Options  = { "Option 1", "Option 2", "Option 3" },
---     --     Default  = "Option 1",
---     --     Multi    = false,
---     --     Callback = function(val)
---     --         notif("Selected: " .. tostring(val), 2)
---     --     end
---     -- })
-
---     -- DemoSection:AddDropdown({
---     --     Title    = "Multi Dropdown",
---     --     Content  = "Select multiple options",
---     --     Options  = { "Apple", "Banana", "Orange" },
---     --     Default  = {"Apple"},
---     --     Multi    = true,
---     --     Callback = function(val)
---     --         -- val is a table of selected items
---     --     end
---     -- })
--- end
-
--- LoadInfoTab()
--- LoadMainTab()
-
--- -- Panggil fungsi untuk menambahkan tab config di urutan paling akhir
--- Tabs:AddConfigTab()
 
 return ProjectZero
