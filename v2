@@ -1897,6 +1897,17 @@ function ProjectZero:Window(GuiConfig)
             local Items = {}
             local CountItem = 0
 
+            -- ═══ ROW (item sejajar / multi kolom) ═══
+            -- Saat AddRow berjalan, setiap item baru ditaruh ke kolom (slot) berikutnya.
+            local RowSlots, RowSlotIndex = nil, 0
+            local function ItemParent()
+                if RowSlots then
+                    RowSlotIndex = math.min(RowSlotIndex + 1, #RowSlots)
+                    return RowSlots[RowSlotIndex]
+                end
+                return SectionAdd
+            end
+
             function Items:AddParagraph(ParagraphConfig)
                 local ParagraphConfig = ParagraphConfig or {}
                 ParagraphConfig.Title = ParagraphConfig.Title or "Title"
@@ -1914,7 +1925,7 @@ function ProjectZero:Window(GuiConfig)
                 Paragraph.LayoutOrder = CountItem
                 Paragraph.Size = UDim2.new(1, 0, 0, 46)
                 Paragraph.Name = "Paragraph"
-                Paragraph.Parent = SectionAdd
+                Paragraph.Parent = ItemParent()
 
                 UICorner14.CornerRadius = UDim.new(0, 4)
                 UICorner14.Parent = Paragraph
@@ -2050,7 +2061,7 @@ function ProjectZero:Window(GuiConfig)
                 Panel.BackgroundTransparency = 0.935
                 Panel.Size = UDim2.new(1, 0, 0, baseHeight)
                 Panel.LayoutOrder = CountItem
-                Panel.Parent = SectionAdd
+                Panel.Parent = ItemParent()
 
                 local UICorner = Instance.new("UICorner")
                 UICorner.CornerRadius = UDim.new(0, 4)
@@ -2185,7 +2196,7 @@ function ProjectZero:Window(GuiConfig)
                 Button.BackgroundTransparency = 1
                 Button.Size = UDim2.new(1, 0, 0, 40)
                 Button.LayoutOrder = CountItem
-                Button.Parent = SectionAdd
+                Button.Parent = ItemParent()
 
                 local UICorner = Instance.new("UICorner")
                 UICorner.CornerRadius = UDim.new(0, 4)
@@ -2357,7 +2368,7 @@ function ProjectZero:Window(GuiConfig)
                 Toggle.BorderSizePixel = 0
                 Toggle.LayoutOrder = CountItem
                 Toggle.Name = "Toggle"
-                Toggle.Parent = SectionAdd
+                Toggle.Parent = ItemParent()
 
                 UICorner20.CornerRadius = UDim.new(0, 4)
                 UICorner20.Parent = Toggle
@@ -2367,6 +2378,7 @@ function ProjectZero:Window(GuiConfig)
                 ToggleTitle.TextSize = 13
                 ToggleTitle.TextColor3 = Color3.fromRGB(231, 231, 231)
                 ToggleTitle.TextXAlignment = Enum.TextXAlignment.Left
+                ToggleTitle.TextTruncate = Enum.TextTruncate.AtEnd
                 ToggleTitle.TextYAlignment = Enum.TextYAlignment.Top
                 ToggleTitle.BackgroundTransparency = 1
                 ToggleTitle.Position = UDim2.new(0, 10, 0, 10)
@@ -2659,7 +2671,7 @@ function ProjectZero:Window(GuiConfig)
                 Slider.LayoutOrder = CountItem
                 Slider.Size = UDim2.new(1, 0, 0, 46)
                 Slider.Name = "Slider"
-                Slider.Parent = SectionAdd
+                Slider.Parent = ItemParent()
 
                 UICorner15.CornerRadius = UDim.new(0, 4)
                 UICorner15.Parent = Slider
@@ -2669,6 +2681,7 @@ function ProjectZero:Window(GuiConfig)
                 SliderTitle.TextColor3 = Color3.fromRGB(230.77499270439148, 230.77499270439148, 230.77499270439148)
                 SliderTitle.TextSize = 13
                 SliderTitle.TextXAlignment = Enum.TextXAlignment.Left
+                SliderTitle.TextTruncate = Enum.TextTruncate.AtEnd
                 SliderTitle.TextYAlignment = Enum.TextYAlignment.Top
                 SliderTitle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 SliderTitle.BackgroundTransparency = 0.9990000128746033
@@ -2879,7 +2892,7 @@ function ProjectZero:Window(GuiConfig)
                 Input.LayoutOrder = CountItem
                 Input.Size = UDim2.new(1, 0, 0, 46)
                 Input.Name = "Input"
-                Input.Parent = SectionAdd
+                Input.Parent = ItemParent()
 
                 UICorner12.CornerRadius = UDim.new(0, 4)
                 UICorner12.Parent = Input
@@ -3025,7 +3038,7 @@ function ProjectZero:Window(GuiConfig)
                 Dropdown.LayoutOrder = CountItem
                 Dropdown.Size = UDim2.new(1, 0, 0, 46)
                 Dropdown.Name = "Dropdown"
-                Dropdown.Parent = SectionAdd
+                Dropdown.Parent = ItemParent()
 
                 DropdownButton.Text = ""
                 DropdownButton.BackgroundTransparency = 1
@@ -3041,6 +3054,7 @@ function ProjectZero:Window(GuiConfig)
                 DropdownTitle.TextColor3 = Color3.fromRGB(230, 230, 230)
                 DropdownTitle.TextSize = 13
                 DropdownTitle.TextXAlignment = Enum.TextXAlignment.Left
+                DropdownTitle.TextTruncate = Enum.TextTruncate.AtEnd
                 DropdownTitle.BackgroundTransparency = 1
                 DropdownTitle.Position = UDim2.new(0, 10, 0, 10)
                 DropdownTitle.Size = UDim2.new(1, -180, 0, 13)
@@ -3323,7 +3337,7 @@ function ProjectZero:Window(GuiConfig)
             function Items:AddDivider()
                 local Divider = Instance.new("Frame")
                 Divider.Name = "Divider"
-                Divider.Parent = SectionAdd
+                Divider.Parent = ItemParent()
                 Divider.AnchorPoint = Vector2.new(0.5, 0)
                 Divider.Position = UDim2.new(0.5, 0, 0, 0)
                 Divider.Size = UDim2.new(1, 0, 0, 2)
@@ -3353,7 +3367,7 @@ function ProjectZero:Window(GuiConfig)
 
                 local SubSection = Instance.new("Frame")
                 SubSection.Name = "SubSection"
-                SubSection.Parent = SectionAdd
+                SubSection.Parent = ItemParent()
                 SubSection.BackgroundTransparency = 1
                 SubSection.Size = UDim2.new(1, 0, 0, 22)
                 SubSection.LayoutOrder = CountItem
@@ -3380,6 +3394,92 @@ function ProjectZero:Window(GuiConfig)
 
                 CountItem = CountItem + 1
                 return SubSection
+            end
+
+            -- Items:AddRow(jumlahKolom, function(Row) ... end)
+            -- Contoh 2 kolom sejajar:
+            --   Section:AddRow(2, function(Row)
+            --       Row:AddToggle({ Title = "A" })
+            --       Row:AddToggle({ Title = "B" })
+            --   end)
+            -- Item pertama masuk kolom 1, kedua kolom 2, dst. Tinggi baris mengikuti item tertinggi.
+            function Items:AddRow(Count, Builder)
+                if type(Count) == "function" then
+                    Builder, Count = Count, 2
+                end
+                Count = math.max(1, math.floor(tonumber(Count) or 2))
+                local GAP = 6
+
+                local Row = Instance.new("Frame")
+                Row.Name = "Row"
+                Row.BackgroundTransparency = 1
+                Row.BorderSizePixel = 0
+                Row.LayoutOrder = CountItem
+                Row.Size = UDim2.new(1, 0, 0, 46)
+                Row.Parent = SectionAdd
+
+                local RowLayout = Instance.new("UIListLayout")
+                RowLayout.FillDirection = Enum.FillDirection.Horizontal
+                RowLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                RowLayout.Padding = UDim.new(0, GAP)
+                RowLayout.Parent = Row
+
+                local Slots = {}
+                for i = 1, Count do
+                    local Slot = Instance.new("Frame")
+                    Slot.Name = "RowSlot"
+                    Slot.BackgroundTransparency = 1
+                    Slot.BorderSizePixel = 0
+                    Slot.LayoutOrder = i
+                    Slot.Size = UDim2.new(1 / Count, -(GAP * (Count - 1)) / Count, 0, 46)
+                    Slot.Parent = Row
+
+                    local SlotLayout = Instance.new("UIListLayout")
+                    SlotLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                    SlotLayout.Padding = UDim.new(0, 3)
+                    SlotLayout.Parent = Slot
+
+                    Slots[i] = Slot
+                end
+
+                -- tinggi baris = kolom tertinggi
+                local function RecalcRow()
+                    local RowHeight = 0
+                    for _, Slot in Slots do
+                        local Sum, N = 0, 0
+                        for _, c in Slot:GetChildren() do
+                            if c:IsA("GuiObject") and c.Visible then
+                                Sum = Sum + c.Size.Y.Offset
+                                N = N + 1
+                            end
+                        end
+                        if N > 1 then Sum = Sum + 3 * (N - 1) end
+                        Slot.Size = UDim2.new(Slot.Size.X.Scale, Slot.Size.X.Offset, 0, Sum)
+                        RowHeight = math.max(RowHeight, Sum)
+                    end
+                    Row.Size = UDim2.new(1, 0, 0, RowHeight)
+                    UpdateSizeSection()
+                end
+
+                RowSlots, RowSlotIndex = Slots, 0
+                local ok, err = pcall(Builder or function() end, Items)
+                RowSlots, RowSlotIndex = nil, 0
+                if not ok then
+                    warn("[ProjectZero] AddRow error: " .. tostring(err))
+                end
+
+                for _, Slot in Slots do
+                    for _, c in Slot:GetChildren() do
+                        if c:IsA("GuiObject") then
+                            c:GetPropertyChangedSignal("Size"):Connect(RecalcRow)
+                            c:GetPropertyChangedSignal("Visible"):Connect(RecalcRow)
+                        end
+                    end
+                end
+                RecalcRow()
+
+                CountItem = CountItem + 1
+                return Items
             end
 
             CountSection = CountSection + 1
