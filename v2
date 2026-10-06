@@ -182,7 +182,22 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
-local CoreGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+-- Parent GUI: CoreGui -> gethui() -> PlayerGui (fallback otomatis kalau executor gak bisa nulis ke CoreGui)
+local function getGuiParent()
+    local ok, cg = pcall(function() return game:GetService("CoreGui") end)
+    if ok and cg then
+        local probe = Instance.new("ScreenGui")
+        local canParent = pcall(function() probe.Parent = cg end)
+        probe:Destroy()
+        if canParent then return cg end
+    end
+
+    local okHui, hui = pcall(function() return gethui and gethui() end)
+    if okHui and hui then return hui end
+
+    return LocalPlayer:WaitForChild("PlayerGui")
+end
+local CoreGui = getGuiParent()
 local viewport = workspace.CurrentCamera.ViewportSize
 
 local function isMobileDevice()
@@ -412,6 +427,13 @@ ProjectZero.Icons = Icons -- dipakai loader: Icon = "eyes" atau ProjectZero.Icon
 -- 1 = polos, menyatu di dalam kartu section (gaya Zeroin). 0.935 = kotak abu per item (gaya lama).
 -- Bisa diubah dari loader sebelum membuat window: ProjectZero.ItemBgTransparency = 0.935
 ProjectZero.ItemBgTransparency = 1
+-- Popup dropdown (panel yang muncul dari kanan pas dropdown diklik).
+--   ProjectZero.DropdownColor = Color3.fromRGB(20, 12, 40)
+--   ProjectZero.DropdownTransparency = 0.25  -- 0 = solid, 1 = hilang
+-- Bisa juga lewat Window({ DropdownColor = ..., DropdownTransparency = ... })
+-- atau kapan aja setelah window jadi: Tabs:SetDropdownStyle(color, transparency)
+ProjectZero.DropdownColor = Color3.fromRGB(30, 30, 30)
+ProjectZero.DropdownTransparency = 0.25
 function ProjectZero:MakeNotify(NotifyConfig)
     local NotifyConfig = NotifyConfig or {}
     NotifyConfig.Title = NotifyConfig.Title or "Project Zero"
@@ -649,6 +671,8 @@ function ProjectZero:Window(GuiConfig)
     GuiConfig.Version      = GuiConfig.Version or 1
     GuiConfig.LogoHUB      = GuiConfig.LogoHUB or "131719728791968" -- logo di kiri judul (topbar)
     GuiConfig.WindowIMG    = GuiConfig.WindowIMG or GuiConfig.LogoHUB -- logo samar di tengah konten
+    GuiConfig.DropdownColor        = GuiConfig.DropdownColor or ProjectZero.DropdownColor
+    GuiConfig.DropdownTransparency = GuiConfig.DropdownTransparency or ProjectZero.DropdownTransparency
 
     CURRENT_VERSION        = GuiConfig.Version
     LoadConfigFromFile()
@@ -685,7 +709,7 @@ function ProjectZero:Window(GuiConfig)
     ProjectZeroOnTop.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ProjectZeroOnTop.Name = "ProjectZeroOnTop"
     ProjectZeroOnTop.ResetOnSpawn = false
-    ProjectZeroOnTop.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+    ProjectZeroOnTop.Parent = CoreGui
 
     DropShadowHolder.BackgroundTransparency = 1
 	--DropShadowHolder.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -1454,7 +1478,7 @@ function ProjectZero:Window(GuiConfig)
         end
         GuiFunc._conns = {}
 
-        -- CoreGui di file ini = PlayerGui (tempat tombol toggle dibuat)
+        -- Tombol toggle dibuat di parent yang sama dengan window (CoreGui / fallback)
         local toggleGui = CoreGui:FindFirstChild("ToggleUIProjectZero")
         if toggleGui then toggleGui:Destroy() end
         if ProjectZeroOnTop then ProjectZeroOnTop:Destroy() end
@@ -1636,7 +1660,8 @@ function ProjectZero:Window(GuiConfig)
 
     function GuiFunc:ToggleUI()
         local ScreenGui = Instance.new("ScreenGui")
-        ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+        ScreenGui.ResetOnSpawn = false
+        ScreenGui.Parent = CoreGui
         ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
         ScreenGui.Name = "ToggleUIProjectZero"
 
@@ -1793,7 +1818,8 @@ function ProjectZero:Window(GuiConfig)
     local DropPageLayout = Instance.new("UIPageLayout");
 
     DropdownSelect.AnchorPoint = Vector2.new(1, 0.5)
-    DropdownSelect.BackgroundColor3 = Color3.fromRGB(30.00000011175871, 30.00000011175871, 30.00000011175871)
+    DropdownSelect.BackgroundColor3 = GuiConfig.DropdownColor
+    DropdownSelect.BackgroundTransparency = GuiConfig.DropdownTransparency
     DropdownSelect.BorderColor3 = Color3.fromRGB(0, 0, 0)
     DropdownSelect.BorderSizePixel = 0
     DropdownSelect.LayoutOrder = 1
@@ -1820,8 +1846,8 @@ function ProjectZero:Window(GuiConfig)
     UIStroke14.Parent = DropdownSelect
 
     DropdownSelectReal.AnchorPoint = Vector2.new(0.5, 0.5)
-    DropdownSelectReal.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Latar Warna Dropdown
-    DropdownSelectReal.BackgroundTransparency = 0.7
+    DropdownSelectReal.BackgroundColor3 = GuiConfig.DropdownColor
+    DropdownSelectReal.BackgroundTransparency = 1 -- warna & transparansi diatur di DropdownSelect
     DropdownSelectReal.BorderColor3 = Color3.fromRGB(0, 0, 0)
     DropdownSelectReal.BorderSizePixel = 0
     DropdownSelectReal.LayoutOrder = 1
@@ -1843,6 +1869,41 @@ function ProjectZero:Window(GuiConfig)
     DropPageLayout.Parent = DropdownFolder
     --// Tabs
     local Tabs = {}
+
+    -- Ganti warna & transparansi popup dropdown kapan aja.
+    -- Contoh: Tabs:SetDropdownStyle(Color3.fromRGB(20, 12, 40), 0.3)
+    function Tabs:SetDropdownStyle(color, transparency)
+        color = color or GuiConfig.DropdownColor
+        if transparency == nil then transparency = GuiConfig.DropdownTransparency end
+        GuiConfig.DropdownColor = color
+        GuiConfig.DropdownTransparency = transparency
+
+        -- warna teks otomatis menyesuaikan terang/gelapnya popup
+        local lightPopup = GetContrastColor(color).R < 0.5
+        local optionText = lightPopup and Color3.fromRGB(20, 20, 20) or Color3.fromRGB(230, 230, 230)
+        local searchText = lightPopup and Color3.fromRGB(10, 10, 10) or Color3.fromRGB(255, 255, 255)
+        GuiConfig._DropdownOptionText = optionText
+        GuiConfig._DropdownSearchText = searchText
+        GuiConfig._DropdownPlaceholder = searchText:Lerp(color, 0.25)
+
+        TweenService:Create(DropdownSelect, TweenInfo.new(0.3), {
+            BackgroundColor3 = color,
+            BackgroundTransparency = transparency
+        }):Play()
+        DropdownSelectReal.BackgroundColor3 = color
+
+        -- update dropdown yang udah kebuat
+        for _, d in ipairs(DropdownFolder:GetDescendants()) do
+            if d.Name == "OptionText" and d:IsA("TextLabel") then
+                d.TextColor3 = optionText
+            elseif d.Name == "SearchBox" and d:IsA("TextBox") then
+                d.TextColor3 = searchText
+                d.PlaceholderColor3 = GuiConfig._DropdownPlaceholder
+            end
+        end
+    end
+    Tabs:SetDropdownStyle(GuiConfig.DropdownColor, GuiConfig.DropdownTransparency)
+
     local CountTab = 0
     local CountDropdown = 0
     function Tabs:AddTab(TabConfig)
@@ -3468,7 +3529,8 @@ function ProjectZero:Window(GuiConfig)
                 SearchBox.Font = Enum.Font.Gotham
                 SearchBox.Text = ""
                 SearchBox.TextSize = 12
-                SearchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+                SearchBox.TextColor3 = GuiConfig._DropdownSearchText
+                SearchBox.PlaceholderColor3 = GuiConfig._DropdownPlaceholder
                 SearchBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
                 SearchBox.BackgroundTransparency = 0.9
                 SearchBox.BorderSizePixel = 0
@@ -3558,7 +3620,7 @@ function ProjectZero:Window(GuiConfig)
                     OptionText.Font = Enum.Font.GothamBold
                     OptionText.Text = label
                     OptionText.TextSize = 13
-                    OptionText.TextColor3 = Color3.fromRGB(230, 230, 230)
+                    OptionText.TextColor3 = GuiConfig._DropdownOptionText
                     OptionText.Position = UDim2.new(0, 8, 0, 8)
                     OptionText.Size = UDim2.new(1, -100, 0, 13)
                     OptionText.BackgroundTransparency = 1
