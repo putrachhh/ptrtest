@@ -896,6 +896,15 @@ function ProjectZero:Window(GuiConfig)
         end)
     end
 
+    -- ═══ UNLOCK FPS ═══
+    -- Batas FPS dilepas (0 = tanpa batas), jadi FPS mengikuti kemampuan device.
+    -- Mau dimatikan? Window({ UnlockFPS = false })
+    if GuiConfig.UnlockFPS ~= false then
+        pcall(function()
+            if setfpscap then setfpscap(0) end
+        end)
+    end
+
     Close.Font = Enum.Font.SourceSans
     Close.Text = ""
     Close.TextColor3 = Color3.fromRGB(0, 0, 0)
