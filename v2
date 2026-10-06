@@ -3528,7 +3528,7 @@ function ProjectZero:Window(GuiConfig)
             end)
 
             -- ═══ PROFILE SECTION ═══
-            local ConfigSection = SettingsTab:AddSection("Config Profile", true)
+            local ConfigSection = SettingsTab:AddSection("Config Profile")
 
             local profileDropdown
             local selectedProfile = "None"
@@ -3656,7 +3656,7 @@ function ProjectZero:Window(GuiConfig)
             })
 
             -- ═══ IMPORT CONFIG ═══
-            local ImportSection = SettingsTab:AddSection("Import Config", true)
+            local ImportSection = SettingsTab:AddSection("Import Config")
 
             local importInput = ImportSection:AddPanel({
                 Title       = "Paste JSON Config",
@@ -3693,7 +3693,7 @@ function ProjectZero:Window(GuiConfig)
 
 
             -- ═══ THEME SECTION ═══
-            local ThemeSection = SettingsTab:AddSection("Theme", true)
+            local ThemeSection = SettingsTab:AddSection("Theme")
 
             local themePresets = {
                 ["Silver"]   = { color = Color3.fromRGB(192, 192, 192), color2 = Color3.fromRGB(10, 10, 10) },
