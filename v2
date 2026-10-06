@@ -365,6 +365,10 @@ local function GetContrastColor(color)
 end
 
 local ProjectZero = {}
+-- Latar tiap item (toggle, slider, dropdown, input, dll).
+-- 1 = polos, menyatu di dalam kartu section (gaya Zeroin). 0.935 = kotak abu per item (gaya lama).
+-- Bisa diubah dari loader sebelum membuat window: ProjectZero.ItemBgTransparency = 0.935
+ProjectZero.ItemBgTransparency = 1
 function ProjectZero:MakeNotify(NotifyConfig)
     local NotifyConfig = NotifyConfig or {}
     NotifyConfig.Title = NotifyConfig.Title or "Project Zero"
@@ -1920,7 +1924,7 @@ function ProjectZero:Window(GuiConfig)
                 local ParagraphContent = Instance.new("TextLabel")
 
                 Paragraph.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                Paragraph.BackgroundTransparency = 0.935
+                Paragraph.BackgroundTransparency = ProjectZero.ItemBgTransparency
                 Paragraph.BorderSizePixel = 0
                 Paragraph.LayoutOrder = CountItem
                 Paragraph.Size = UDim2.new(1, 0, 0, 46)
@@ -2058,7 +2062,7 @@ function ProjectZero:Window(GuiConfig)
 
                 local Panel = Instance.new("Frame")
                 Panel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                Panel.BackgroundTransparency = 0.935
+                Panel.BackgroundTransparency = ProjectZero.ItemBgTransparency
                 Panel.Size = UDim2.new(1, 0, 0, baseHeight)
                 Panel.LayoutOrder = CountItem
                 Panel.Parent = ItemParent()
@@ -2364,7 +2368,7 @@ function ProjectZero:Window(GuiConfig)
                 local KeybindButton = Instance.new("TextButton")
 
                 Toggle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                Toggle.BackgroundTransparency = 0.935
+                Toggle.BackgroundTransparency = ProjectZero.ItemBgTransparency
                 Toggle.BorderSizePixel = 0
                 Toggle.LayoutOrder = CountItem
                 Toggle.Name = "Toggle"
@@ -2665,7 +2669,7 @@ function ProjectZero:Window(GuiConfig)
                 local UIStroke7 = Instance.new("UIStroke");
 
                 Slider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                Slider.BackgroundTransparency = 0.935
+                Slider.BackgroundTransparency = ProjectZero.ItemBgTransparency
                 Slider.BorderColor3 = Color3.fromRGB(0, 0, 0)
                 Slider.BorderSizePixel = 0
                 Slider.LayoutOrder = CountItem
@@ -2886,7 +2890,7 @@ function ProjectZero:Window(GuiConfig)
                 local InputTextBox = Instance.new("TextBox");
 
                 Input.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                Input.BackgroundTransparency = 0.935
+                Input.BackgroundTransparency = ProjectZero.ItemBgTransparency
                 Input.BorderColor3 = Color3.fromRGB(0, 0, 0)
                 Input.BorderSizePixel = 0
                 Input.LayoutOrder = CountItem
@@ -3033,7 +3037,7 @@ function ProjectZero:Window(GuiConfig)
                 local OptionImg = Instance.new("ImageLabel")
 
                 Dropdown.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                Dropdown.BackgroundTransparency = 0.935
+                Dropdown.BackgroundTransparency = ProjectZero.ItemBgTransparency
                 Dropdown.BorderSizePixel = 0
                 Dropdown.LayoutOrder = CountItem
                 Dropdown.Size = UDim2.new(1, 0, 0, 46)
