@@ -366,6 +366,7 @@ function CircleClick(Button, X, Y)
 end
 
 local CurrentAccent = Color3.fromRGB(192, 192, 192)
+local CurrentNotifyLogo = nil -- diisi dari Window (GuiConfig.WindowIMG) = logo di tengah UI
 
 -- Pilih teks gelap atau putih otomatis sesuai terang-gelapnya warna aksen
 local function GetContrastColor(color)
@@ -439,7 +440,7 @@ function ProjectZero:MakeNotify(NotifyConfig)
     NotifyConfig.Title = NotifyConfig.Title or "Project Zero"
     NotifyConfig.Description = NotifyConfig.Description or "Notification"
     NotifyConfig.Content = NotifyConfig.Content or "Content"
-    NotifyConfig.Icon = NotifyConfig.Icon or "108203634075572"
+    -- Icon: kalau gak diisi, otomatis pakai logo tengah UI (WindowIMG)
     NotifyConfig.Color = NotifyConfig.Color or CurrentAccent
     NotifyConfig.Time = NotifyConfig.Time or 0.5
     NotifyConfig.Delay = NotifyConfig.Delay or 5
@@ -449,37 +450,38 @@ function ProjectZero:MakeNotify(NotifyConfig)
             local PZNotifyGui = Instance.new("ScreenGui");
             PZNotifyGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
             PZNotifyGui.Name = "PZNotifyGui"
+            PZNotifyGui.ResetOnSpawn = false
             PZNotifyGui.Parent = CoreGui
         end
         if not CoreGui.PZNotifyGui:FindFirstChild("PZNotifyLayout") then
             local PZNotifyLayout = Instance.new("Frame");
-            PZNotifyLayout.AnchorPoint = Vector2.new(1, 0)
+            PZNotifyLayout.AnchorPoint = Vector2.new(1, 1) -- pojok kanan bawah
             PZNotifyLayout.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             PZNotifyLayout.BackgroundTransparency = 0.9990000128746033
             PZNotifyLayout.BorderColor3 = Color3.fromRGB(0, 0, 0)
             PZNotifyLayout.BorderSizePixel = 0
-            PZNotifyLayout.Position = UDim2.new(1, -30, 0, 30)
+            PZNotifyLayout.Position = UDim2.new(1, -30, 1, -30) -- jarak dari tepi kanan & bawah
             PZNotifyLayout.Size = UDim2.new(0, 320, 1, 0)
             PZNotifyLayout.Name = "PZNotifyLayout"
             PZNotifyLayout.Parent = CoreGui.PZNotifyGui
-            local Count = 0
             CoreGui.PZNotifyGui.PZNotifyLayout.ChildRemoved:Connect(function()
-                Count = 0
+                -- notif paling lama di paling bawah, yang baru numpuk ke atas
+                local stackY = 0
                 for i, v in CoreGui.PZNotifyGui.PZNotifyLayout:GetChildren() do
                     if v.Name ~= "NotifyFrame" then continue end
                     TweenService:Create(
                         v,
                         TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-                        { Position = UDim2.new(0, 0, 0, ((v.Size.Y.Offset + 12) * Count)) }
+                        { Position = UDim2.new(0, 0, 1, -stackY) }
                     ):Play()
-                    Count = Count + 1
+                    stackY = stackY + v.Size.Y.Offset + 12
                 end
             end)
         end
-        local NotifyPosHeigh = 0
+        local NotifyPosHeigh = 0 -- total tinggi notif yang masih tampil (jarak dari bawah)
         for i, v in CoreGui.PZNotifyGui.PZNotifyLayout:GetChildren() do
             if v.Name ~= "NotifyFrame" then continue end
-            NotifyPosHeigh = v.Position.Y.Offset + v.Size.Y.Offset + 12
+            NotifyPosHeigh = NotifyPosHeigh + v.Size.Y.Offset + 12
         end
         local NotifyFrame = Instance.new("Frame");
         local NotifyFrameReal = Instance.new("Frame");
@@ -501,8 +503,8 @@ function ProjectZero:MakeNotify(NotifyConfig)
         NotifyFrame.Name = "NotifyFrame"
         NotifyFrame.BackgroundTransparency = 1
         NotifyFrame.Parent = CoreGui.PZNotifyGui.PZNotifyLayout
-        NotifyFrame.AnchorPoint = Vector2.new(0, 0)
-        NotifyFrame.Position = UDim2.new(0, 0, 0, NotifyPosHeigh)
+        NotifyFrame.AnchorPoint = Vector2.new(0, 1) -- nempel dari bawah, tinggi berubah numbuhnya ke atas
+        NotifyFrame.Position = UDim2.new(0, 0, 1, -NotifyPosHeigh)
 
         NotifyFrameReal.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
         NotifyFrameReal.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -523,7 +525,7 @@ function ProjectZero:MakeNotify(NotifyConfig)
         DropShadowHolder.Parent = NotifyFrameReal
 
         local NotifIcon = Instance.new("ImageLabel")
-        NotifIcon.Image = "rbxassetid://108203634075572" --.. NotifyConfig.Icon
+        NotifIcon.Image = ResolveIcon(NotifyConfig.Icon or CurrentNotifyLogo) or "rbxassetid://108203634075572"
         NotifIcon.BackgroundTransparency = 1
         NotifIcon.ImageTransparency = 0
         NotifIcon.BorderSizePixel = 0
@@ -671,6 +673,7 @@ function ProjectZero:Window(GuiConfig)
     GuiConfig.Version      = GuiConfig.Version or 1
     GuiConfig.LogoHUB      = GuiConfig.LogoHUB or "131719728791968" -- logo di kiri judul (topbar)
     GuiConfig.WindowIMG    = GuiConfig.WindowIMG or GuiConfig.LogoHUB -- logo samar di tengah konten
+    CurrentNotifyLogo      = GuiConfig.WindowIMG -- logo notif = logo tengah UI
     GuiConfig.DropdownColor        = GuiConfig.DropdownColor or ProjectZero.DropdownColor
     GuiConfig.DropdownTransparency = GuiConfig.DropdownTransparency or ProjectZero.DropdownTransparency
 
