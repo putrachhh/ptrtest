@@ -1677,10 +1677,13 @@ function ProjectZero:Window(GuiConfig)
         --// Section
         local Sections = {}
         local CountSection = 0
-        function Sections:AddSection(Title, AlwaysOpen)
-            -- Default: section langsung terbuka & tidak bisa ditutup (gaya Zeroin).
-            -- Mau section yang bisa buka-tutup? Pakai AddSection("Judul", false)
-            if AlwaysOpen == nil then AlwaysOpen = true end
+        function Sections:AddSection(Title, AlwaysOpen, DefaultOpen)
+            -- Default: section bisa buka-tutup (ada panah) & awalnya TERTUTUP.
+            --   AddSection("Judul")              -> buka-tutup, awal tertutup
+            --   AddSection("Judul", false, true) -> buka-tutup, awal terbuka
+            --   AddSection("Judul", true)        -> selalu terbuka, tanpa panah
+            if AlwaysOpen == nil then AlwaysOpen = false end
+            if DefaultOpen == nil then DefaultOpen = false end
             local Title = Title or "Title"
             local Section = Instance.new("Frame");
             local UICorner1 = Instance.new("UICorner");
@@ -1846,7 +1849,7 @@ function ProjectZero:Window(GuiConfig)
                 SectionButton:Destroy()
                 FeatureFrame:Destroy()
                 OpenSection = true
-            elseif AlwaysOpen == false then
+            elseif DefaultOpen == true then
                 OpenSection = true
             else
                 OpenSection = false
@@ -1869,7 +1872,7 @@ function ProjectZero:Window(GuiConfig)
                 end)
             end
 
-            if AlwaysOpen == true or AlwaysOpen == false then
+            if AlwaysOpen == true or DefaultOpen == true then
                 OpenSection = true
                 local SectionSizeYWitdh = 38 + CARD_PAD * 2
                 for _, v in SectionAdd:GetChildren() do
@@ -3525,7 +3528,7 @@ function ProjectZero:Window(GuiConfig)
             end)
 
             -- ═══ PROFILE SECTION ═══
-            local ConfigSection = SettingsTab:AddSection("Config Profile")
+            local ConfigSection = SettingsTab:AddSection("Config Profile", true)
 
             local profileDropdown
             local selectedProfile = "None"
@@ -3653,7 +3656,7 @@ function ProjectZero:Window(GuiConfig)
             })
 
             -- ═══ IMPORT CONFIG ═══
-            local ImportSection = SettingsTab:AddSection("Import Config")
+            local ImportSection = SettingsTab:AddSection("Import Config", true)
 
             local importInput = ImportSection:AddPanel({
                 Title       = "Paste JSON Config",
@@ -3690,7 +3693,7 @@ function ProjectZero:Window(GuiConfig)
 
 
             -- ═══ THEME SECTION ═══
-            local ThemeSection = SettingsTab:AddSection("Theme")
+            local ThemeSection = SettingsTab:AddSection("Theme", true)
 
             local themePresets = {
                 ["Silver"]   = { color = Color3.fromRGB(192, 192, 192), color2 = Color3.fromRGB(10, 10, 10) },
