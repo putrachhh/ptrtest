@@ -729,15 +729,15 @@ function ProjectZero:Window(GuiConfig)
     TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
     TextLabel.BorderSizePixel = 0
     TextLabel.Size = UDim2.new(1, -100, 1, 0)
-    TextLabel.Position = UDim2.new(0, 38, 0, 0)
+    TextLabel.Position = UDim2.new(0, 40, 0, 0)
     TextLabel.Parent = Top
 
     local LogoImg = Instance.new("ImageLabel")
     LogoImg.Image = GuiConfig.LogoHUB and ("rbxassetid://" .. GuiConfig.LogoHUB) or ""
 	LogoImg.BackgroundTransparency = 1
 	LogoImg.BorderSizePixel = 0
-	LogoImg.Size = UDim2.new(0, 22, 0, 22)
-	LogoImg.Position = UDim2.new(0, 8, 0.5, -11)
+	LogoImg.Size = UDim2.new(0, 28, 0, 28)
+	LogoImg.Position = UDim2.new(0, 6, 0.5, -14)
 	LogoImg.ScaleType = Enum.ScaleType.Fit
 	LogoImg.Name = "LogoImg"
 	LogoImg.Parent = Top
