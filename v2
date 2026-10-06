@@ -365,7 +365,49 @@ local function GetContrastColor(color)
     return Color3.fromRGB(255, 255, 255)
 end
 
+-- Ubah nama ikon ("eyes") / angka asset ID jadi string rbxassetid. Kosong -> nil.
+local function ResolveIcon(icon)
+    if icon == nil or icon == "" then return nil end
+    if Icons[icon] then return Icons[icon] end
+    if tostring(icon):match("^%d+$") then return "rbxassetid://" .. tostring(icon) end
+    return tostring(icon)
+end
+
+-- Gaya badge topbar: isi ungu gelap agak transparan + border tipis ungu + ikon kecil + teks putih
+local function ApplyBadgeStyle(frame, label, iconId, accent)
+    frame.BackgroundColor3 = accent:Lerp(Color3.new(0, 0, 0), 0.65)
+    frame.BackgroundTransparency = 0.3
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = accent
+    stroke.Thickness = 1
+    stroke.Transparency = 0.45
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.Parent = frame
+
+    local list = Instance.new("UIListLayout")
+    list.FillDirection = Enum.FillDirection.Horizontal
+    list.VerticalAlignment = Enum.VerticalAlignment.Center
+    list.SortOrder = Enum.SortOrder.LayoutOrder
+    list.Padding = UDim.new(0, 5)
+    list.Parent = frame
+
+    if iconId then
+        local icon = Instance.new("ImageLabel")
+        icon.Name = "BadgeIcon"
+        icon.LayoutOrder = 1
+        icon.Size = UDim2.new(0, 13, 0, 13)
+        icon.BackgroundTransparency = 1
+        icon.Image = iconId
+        icon.Parent = frame
+    end
+
+    label.LayoutOrder = 2
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+end
+
 local ProjectZero = {}
+ProjectZero.Icons = Icons -- dipakai loader: Icon = "eyes" atau ProjectZero.Icons.eyes
 -- Latar tiap item (toggle, slider, dropdown, input, dll).
 -- 1 = polos, menyatu di dalam kartu section (gaya Zeroin). 0.935 = kotak abu per item (gaya lama).
 -- Bisa diubah dari loader sebelum membuat window: ProjectZero.ItemBgTransparency = 0.935
@@ -606,6 +648,7 @@ function ProjectZero:Window(GuiConfig)
     GuiConfig["Tab Width"] = GuiConfig["Tab Width"] or 120
     GuiConfig.Version      = GuiConfig.Version or 1
     GuiConfig.LogoHUB      = GuiConfig.LogoHUB or "131719728791968" -- logo di kiri judul (topbar)
+    GuiConfig.WindowIMG    = GuiConfig.WindowIMG or GuiConfig.LogoHUB -- logo samar di tengah konten
 
     CURRENT_VERSION        = GuiConfig.Version
     LoadConfigFromFile()
@@ -682,7 +725,7 @@ function ProjectZero:Window(GuiConfig)
         Main.ImageTransparency = GuiConfig.ThemeTransparency or 0.15
     else
         Main.BackgroundColor3 = GuiConfig.Color2 -- Latar Warna Window
-        Main.BackgroundTransparency = 0.15
+        Main.BackgroundTransparency = 0.02 -- hampir solid (sebelumnya 0.15 = game tembus pandang)
     end
 
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -826,6 +869,9 @@ function ProjectZero:Window(GuiConfig)
     ExecutorTextLabel.AutomaticSize = Enum.AutomaticSize.X
     ExecutorTextLabel.Parent = Executor
 
+    ApplyBadgeStyle(FooterFrame, TextLabel1, Icons.gamepad, GuiConfig.Color)
+    ApplyBadgeStyle(Executor, ExecutorTextLabel, Icons.idea, GuiConfig.Color)
+
     -- ═══ FPS & PING (badge topbar) ═══
     -- Urutan topbar: [Game] [FPS] [Ping] [Executor]
     -- Mau dimatikan? Window({ ShowStats = false })
@@ -834,7 +880,7 @@ function ProjectZero:Window(GuiConfig)
         local RunService   = game:GetService("RunService")
         local StatsService = game:GetService("Stats")
 
-        local function MakeStatBadge(name, order, text)
+        local function MakeStatBadge(name, order, text, iconId)
             local frame = Instance.new("Frame")
             frame.Name = name
             frame.LayoutOrder = order
@@ -866,12 +912,13 @@ function ProjectZero:Window(GuiConfig)
             label.AutomaticSize = Enum.AutomaticSize.X
             label.Parent = frame
 
+            ApplyBadgeStyle(frame, label, iconId, GuiConfig.Color)
             table.insert(StatBadges.list, { frame = frame, label = label })
             return label
         end
 
-        local fpsLabel  = MakeStatBadge("FpsBadge", 2, "-- FPS")
-        local pingLabel = MakeStatBadge("PingBadge", 3, "-- ms")
+        local fpsLabel  = MakeStatBadge("FpsBadge", 2, "-- FPS", Icons.stat)
+        local pingLabel = MakeStatBadge("PingBadge", 3, "-- ms", Icons.web)
 
         local frames, lastT = 0, os.clock()
         local conn
@@ -1101,6 +1148,58 @@ function ProjectZero:Window(GuiConfig)
         AvatarImg.Image = url
     end)
 
+    -- Kartu Discord (opsional): Window({ Discord = "discord.gg/xxxx" })
+    -- Kalau diisi, menggantikan kartu avatar; klik = salin link ke clipboard.
+    if GuiConfig.Discord then
+        AvatarCircle.Visible = false
+        AccountName.Visible = false
+
+        local DcIcon = Instance.new("ImageLabel")
+        DcIcon.Image = Icons.discord
+        DcIcon.BackgroundTransparency = 1
+        DcIcon.Size = UDim2.new(0, 20, 0, 20)
+        DcIcon.Position = UDim2.new(0, 8, 0.5, -10)
+        DcIcon.Parent = AccountTab
+
+        local DcTitle = Instance.new("TextLabel")
+        DcTitle.BackgroundTransparency = 1
+        DcTitle.Font = Enum.Font.GothamBold
+        DcTitle.Text = "Discord"
+        DcTitle.TextSize = 11
+        DcTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+        DcTitle.TextXAlignment = Enum.TextXAlignment.Left
+        DcTitle.Position = UDim2.new(0, 34, 0, 4)
+        DcTitle.Size = UDim2.new(1, -38, 0, 14)
+        DcTitle.Parent = AccountTab
+
+        local DcLink = Instance.new("TextLabel")
+        DcLink.BackgroundTransparency = 1
+        DcLink.Font = Enum.Font.Gotham
+        DcLink.Text = tostring(GuiConfig.Discord)
+        DcLink.TextSize = 9
+        DcLink.TextColor3 = Color3.fromRGB(175, 170, 195)
+        DcLink.TextXAlignment = Enum.TextXAlignment.Left
+        DcLink.TextTruncate = Enum.TextTruncate.AtEnd
+        DcLink.Position = UDim2.new(0, 34, 0, 18)
+        DcLink.Size = UDim2.new(1, -38, 0, 12)
+        DcLink.Parent = AccountTab
+
+        local DcButton = Instance.new("TextButton")
+        DcButton.BackgroundTransparency = 1
+        DcButton.Text = ""
+        DcButton.Size = UDim2.new(1, 0, 1, 0)
+        DcButton.Parent = AccountTab
+        DcButton.Activated:Connect(function()
+            local copy = setclipboard or toclipboard
+            if copy then
+                pcall(copy, tostring(GuiConfig.Discord))
+                notif("Discord link copied!", 3)
+            else
+                notif("Executor does not support clipboard!", 3)
+            end
+        end)
+    end
+
     UICorner2.CornerRadius = UDim.new(0, 2)
     UICorner2.Parent = LayersTab
 
@@ -1142,10 +1241,11 @@ function ProjectZero:Window(GuiConfig)
 	local WindowImg2 = Instance.new("ImageLabel")
 	WindowImg2.Image = GuiConfig.WindowIMG and ("rbxassetid://" .. GuiConfig.WindowIMG) or ""
 	WindowImg2.BackgroundTransparency = 1
-	WindowImg2.ImageTransparency = 0.8
+	WindowImg2.ImageTransparency = 0.86
 	WindowImg2.BorderSizePixel = 0
-	WindowImg2.Size = UDim2.new(0.68, 0, 0.9, 0)
-	WindowImg2.Position = UDim2.new(0.32, 0, 0.125, 0)
+	WindowImg2.AnchorPoint = Vector2.new(0.5, 0.5)
+	WindowImg2.Size = UDim2.new(0.75, 0, 0.85, 0)
+	WindowImg2.Position = UDim2.new(0.5, 0, 0.5, 0)
 	WindowImg2.ScaleType = Enum.ScaleType.Fit
 	WindowImg2.Name = "WindowImg2"
 	WindowImg2.ZIndex = 0
@@ -1742,6 +1842,20 @@ function ProjectZero:Window(GuiConfig)
         TabName.Position = UDim2.new(0, 8, 0, 0)
         TabName.Name = "TabName"
         TabName.Parent = Tab
+
+        -- Ikon tab (nama dari tabel Icons, mis. "eyes", atau angka asset ID)
+        local tabIconImage = ResolveIcon(TabConfig.Icon)
+        if tabIconImage then
+            local TabIcon = Instance.new("ImageLabel")
+            TabIcon.Name = "TabIcon"
+            TabIcon.Image = tabIconImage
+            TabIcon.BackgroundTransparency = 1
+            TabIcon.Size = UDim2.new(0, 16, 0, 16)
+            TabIcon.Position = UDim2.new(0, 10, 0.5, -8)
+            TabIcon.Parent = Tab
+            TabName.Position = UDim2.new(0, 33, 0, 0)
+            TabName.Size = UDim2.new(1, -33, 1, 0)
+        end
 
         if CountTab == 0 then
             LayersPageLayout:JumpToIndex(0)
@@ -3247,7 +3361,7 @@ function ProjectZero:Window(GuiConfig)
                 end)
 
                 OptionSelecting.Font = Enum.Font.GothamBold
-                OptionSelecting.Text = DropdownConfig.Multi and "Select Options" or "Select Option"
+                OptionSelecting.Text = "None"
                 OptionSelecting.TextColor3 = Color3.fromRGB(255, 255, 255)
                 OptionSelecting.TextSize = 12
                 OptionSelecting.TextTransparency = 0.6
@@ -3329,7 +3443,7 @@ function ProjectZero:Window(GuiConfig)
                     end
                     DropdownFunc.Value = DropdownConfig.Multi and {} or nil
                     DropdownFunc.Options = {}
-                    OptionSelecting.Text = DropdownConfig.Multi and "Select Options" or "Select Option"
+                    OptionSelecting.Text = "None"
                     DropCount = 0
                 end
 
@@ -3445,7 +3559,7 @@ function ProjectZero:Window(GuiConfig)
                     end
 
                     OptionSelecting.Text = (#texts == 0)
-                        and (DropdownConfig.Multi and "Select Options" or "Select Option")
+                        and ("None")
                         or table.concat(texts, ", ")
 
                     if DropdownConfig.Callback then
