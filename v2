@@ -725,7 +725,8 @@ function ProjectZero:Window(GuiConfig)
         Main.ImageTransparency = GuiConfig.ThemeTransparency or 0.15
     else
         Main.BackgroundColor3 = GuiConfig.Color2 -- Latar Warna Window
-        Main.BackgroundTransparency = 0.02 -- hampir solid (sebelumnya 0.15 = game tembus pandang)
+        -- Transparansi window. Ubah lewat Window({ BgTransparency = 0.25 }). 0 = solid, 1 = tembus total.
+        Main.BackgroundTransparency = GuiConfig.BgTransparency or 0.2
     end
 
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -943,6 +944,52 @@ function ProjectZero:Window(GuiConfig)
                 end
             end
         end)
+    end
+
+    -- ═══ ANTI-OVERFLOW TOPBAR ═══
+    -- Badge yang tidak muat disembunyikan supaya tidak menimpa judul.
+    -- Urutan disembunyikan: Ping -> Executor -> FPS -> Game
+    do
+        local HIDE_ORDER = { "PingBadge", "Executor", "FpsBadge", "FooterFrame" }
+        local GAP, RIGHT_RESERVE = 8, 110 -- jarak antar badge, ruang tombol min/full/close
+        local fitting = false
+
+        local function FitBadges()
+            if fitting then return end
+            fitting = true
+            local titleEnd = 40 + TextLabel.TextBounds.X + 14
+            local avail = Top.AbsoluteSize.X - titleEnd - RIGHT_RESERVE
+
+            local items, total = {}, 0
+            for _, name in ipairs(HIDE_ORDER) do
+                local f = RightContainer:FindFirstChild(name)
+                if f then
+                    if f.Visible and f.AbsoluteSize.X > 0 then
+                        f:SetAttribute("FullW", f.AbsoluteSize.X)
+                    end
+                    local w = f:GetAttribute("FullW") or 0
+                    table.insert(items, { frame = f, w = w })
+                    total = total + w + GAP
+                end
+            end
+            for _, it in ipairs(items) do
+                if total > avail and avail > 0 then
+                    it.frame.Visible = false
+                    total = total - it.w - GAP
+                else
+                    it.frame.Visible = true
+                end
+            end
+            fitting = false
+        end
+
+        Top:GetPropertyChangedSignal("AbsoluteSize"):Connect(FitBadges)
+        TextLabel:GetPropertyChangedSignal("TextBounds"):Connect(FitBadges)
+        for _, name in ipairs(HIDE_ORDER) do
+            local f = RightContainer:FindFirstChild(name)
+            if f then f:GetPropertyChangedSignal("AbsoluteSize"):Connect(FitBadges) end
+        end
+        task.defer(FitBadges)
     end
 
     -- ═══ UNLOCK FPS ═══
