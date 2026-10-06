@@ -947,37 +947,67 @@ function ProjectZero:Window(GuiConfig)
     end
 
     -- ═══ ANTI-OVERFLOW TOPBAR ═══
-    -- Badge yang tidak muat disembunyikan supaya tidak menimpa judul.
-    -- Urutan disembunyikan: Ping -> Executor -> FPS -> Game
+    -- Badge tidak boleh menimpa judul. Dua tahap:
+    --   1) kalau tidak muat -> mode KOMPAK (ikon badge disembunyikan, padding dirapatkan)
+    --   2) masih tidak muat -> sembunyikan badge: Executor -> Game -> FPS (Ping dipertahankan paling akhir)
     do
-        local HIDE_ORDER = { "PingBadge", "Executor", "FpsBadge", "FooterFrame" }
-        local GAP, RIGHT_RESERVE = 8, 110 -- jarak antar badge, ruang tombol min/full/close
+        local HIDE_ORDER = { "Executor", "FooterFrame", "FpsBadge", "PingBadge" }
+        local GAP, RIGHT_RESERVE = 8, 110
         local fitting = false
+
+        local function Collect()
+            local list = {}
+            for _, name in ipairs(HIDE_ORDER) do
+                local f = RightContainer:FindFirstChild(name)
+                if f then
+                    table.insert(list, {
+                        frame = f,
+                        label = f:FindFirstChildOfClass("TextLabel"),
+                        icon  = f:FindFirstChild("BadgeIcon"),
+                        pad   = f:FindFirstChildOfClass("UIPadding"),
+                    })
+                end
+            end
+            return list
+        end
+
+        local function WidthOf(it, compact)
+            local textW = it.label and it.label.TextBounds.X or 0
+            local iconW = (it.icon and not compact) and 18 or 0
+            return (compact and 12 or 20) + iconW + textW
+        end
 
         local function FitBadges()
             if fitting then return end
             fitting = true
+            local items = Collect()
             local titleEnd = 40 + TextLabel.TextBounds.X + 14
             local avail = Top.AbsoluteSize.X - titleEnd - RIGHT_RESERVE
 
-            local items, total = {}, 0
-            for _, name in ipairs(HIDE_ORDER) do
-                local f = RightContainer:FindFirstChild(name)
-                if f then
-                    if f.Visible and f.AbsoluteSize.X > 0 then
-                        f:SetAttribute("FullW", f.AbsoluteSize.X)
+            local function Total(compact, skipHidden, hiddenCount)
+                local t, n = 0, 0
+                for i, it in ipairs(items) do
+                    if not (skipHidden and i <= hiddenCount) then
+                        t = t + WidthOf(it, compact); n = n + 1
                     end
-                    local w = f:GetAttribute("FullW") or 0
-                    table.insert(items, { frame = f, w = w })
-                    total = total + w + GAP
+                end
+                return t + GAP * math.max(n - 1, 0)
+            end
+
+            local compact, hidden = false, 0
+            if avail > 0 and Total(false, true, 0) > avail then
+                compact = true
+                while hidden < #items - 1 and Total(true, true, hidden) > avail do
+                    hidden = hidden + 1
                 end
             end
-            for _, it in ipairs(items) do
-                if total > avail and avail > 0 then
-                    it.frame.Visible = false
-                    total = total - it.w - GAP
-                else
-                    it.frame.Visible = true
+
+            for i, it in ipairs(items) do
+                it.frame.Visible = i > hidden
+                if it.icon then it.icon.Visible = not compact end
+                if it.pad then
+                    local p = compact and 6 or 10
+                    it.pad.PaddingLeft, it.pad.PaddingRight = UDim.new(0, p), UDim.new(0, p)
                 end
             end
             fitting = false
@@ -985,9 +1015,8 @@ function ProjectZero:Window(GuiConfig)
 
         Top:GetPropertyChangedSignal("AbsoluteSize"):Connect(FitBadges)
         TextLabel:GetPropertyChangedSignal("TextBounds"):Connect(FitBadges)
-        for _, name in ipairs(HIDE_ORDER) do
-            local f = RightContainer:FindFirstChild(name)
-            if f then f:GetPropertyChangedSignal("AbsoluteSize"):Connect(FitBadges) end
+        for _, it in ipairs(Collect()) do
+            if it.label then it.label:GetPropertyChangedSignal("TextBounds"):Connect(FitBadges) end
         end
         task.defer(FitBadges)
     end
